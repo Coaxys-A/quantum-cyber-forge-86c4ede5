@@ -7,6 +7,164 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  ADMIN
+  OPS
+  VIEWER
+  BILLING_OWNER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ModuleStatus {
+  DRAFT
+  EXPERIMENTAL
+  CANARY
+  STABLE
+  DEPRECATED
+  ARCHIVED
+}
+
+enum ModuleCategory {
+  RUNTIME
+  TELEMETRY
+  SECURITY
+  NETWORK
+  STORAGE
+  COMPUTE
+  ANALYTICS
+  INTEGRATION
+}
+
+enum StageStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskStatus {
+  OPEN
+  IN_REVIEW
+  MITIGATED
+  ACCEPTED
+  CLOSED
+}
+
+enum ControlStatus {
+  PLANNED
+  IMPLEMENTED
+  ACTIVE
+  INACTIVE
+  DEPRECATED
+}
+
+enum ComponentType {
+  FRONTEND
+  BACKEND
+  DATABASE
+  CACHE
+  QUEUE
+  STORAGE
+  NETWORK
+  SECURITY
+  ANALYTICS
+  INTEGRATION
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  DOWN
+  UNKNOWN
+}
+
+enum SimulationStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  COMPLETED
+  FAILED
+  ARCHIVED
+}
+
+enum SimulationScenario {
+  APT_ATTACK
+  RANSOMWARE
+  DDoS
+  DATA_BREACH
+  INSIDER_THREAT
+  SUPPLY_CHAIN
+  PHISHING
+  ZERO_DAY
+  CUSTOM
+}
+
+enum EventSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+  INCOMPLETE
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+}
+
+enum IntegrationProvider {
+  SLACK
+  TEAMS
+  GITHUB
+  JIRA
+  PAGERDUTY
+  DATADOG
+  SPLUNK
+  CUSTOM
+}
+
 enum UserStatus {
   ACTIVE
   SUSPENDED

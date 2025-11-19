@@ -1,0 +1,787 @@
+// HYPERION-FLUX PRODUCTION-READY SCHEMA
+// Complete Prisma schema with all enums and multi-tenant support
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =================================================================================
+// ENUMS
+// =================================================================================
+
+enum UserRole {
+  ADMIN
+  OPS
+  VIEWER
+  BILLING_OWNER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ModuleStatus {
+  DRAFT
+  EXPERIMENTAL
+  CANARY
+  STABLE
+  DEPRECATED
+  ARCHIVED
+}
+
+enum ModuleCategory {
+  RUNTIME
+  TELEMETRY
+  SECURITY
+  NETWORK
+  STORAGE
+  COMPUTE
+  ANALYTICS
+  INTEGRATION
+}
+
+enum StageStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskStatus {
+  OPEN
+  IN_REVIEW
+  MITIGATED
+  ACCEPTED
+  CLOSED
+}
+
+enum ControlStatus {
+  PLANNED
+  IMPLEMENTED
+  ACTIVE
+  INACTIVE
+  DEPRECATED
+}
+
+enum ComponentType {
+  FRONTEND
+  BACKEND
+  DATABASE
+  CACHE
+  QUEUE
+  STORAGE
+  NETWORK
+  SECURITY
+  ANALYTICS
+  INTEGRATION
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  DOWN
+  UNKNOWN
+}
+
+enum SimulationStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  COMPLETED
+  FAILED
+  ARCHIVED
+}
+
+enum SimulationScenario {
+  APT_ATTACK
+  RANSOMWARE
+  DDoS
+  DATA_BREACH
+  INSIDER_THREAT
+  SUPPLY_CHAIN
+  PHISHING
+  ZERO_DAY
+  CUSTOM
+}
+
+enum EventSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+  INCOMPLETE
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+}
+
+enum IntegrationProvider {
+  SLACK
+  TEAMS
+  GITHUB
+  JIRA
+  PAGERDUTY
+  DATADOG
+  SPLUNK
+  CUSTOM
+}
+
+// =================================================================================
+// TENANT & AUTH
+// =================================================================================
+
+model Tenant {
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique
+  logoUrl       String?
+  themeColor    String   @default("#0066cc")
+  defaultLang   String   @default("en")
+  timezone      String   @default("UTC")
+  isActive      Boolean  @default(true)
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  users               User[]
+  modules             Module[]
+  stages              Stage[]
+  tasks               Task[]
+  milestones          Milestone[]
+  componentNodes      ComponentNode[]
+  componentEdges      ComponentEdge[]
+  risks               RiskItem[]
+  controls            Control[]
+  findings            Finding[]
+  simulations         Simulation[]
+  plans               Plan[]
+  subscriptions       Subscription[]
+  docPages            DocPage[]
+  integrationConfigs  IntegrationConfig[]
+  appSettings         AppSetting[]
+  auditLogs           AuditLog[]
+  notifications       Notification[]
+  comments            Comment[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model User {
+  id             String     @id @default(uuid())
+  tenantId       String
+  email          String     @unique
+  hashedPassword String
+  firstName      String?
+  lastName       String?
+  avatarUrl      String?
+  role           UserRole   @default(VIEWER)
+  status         UserStatus @default(ACTIVE)
+  language       String     @default("en")
+  timezone       String     @default("UTC")
+  lastLoginAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  tenant              Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ownedModules        Module[]          @relation("ModuleOwner")
+  assignedTasks       Task[]            @relation("TaskAssignee")
+  ownedRisks          RiskItem[]        @relation("RiskOwner")
+  createdSimulations  Simulation[]      @relation("SimulationCreator")
+  subscriptions       Subscription[]    @relation("SubscriptionOwner")
+  auditLogs           AuditLog[]
+  refreshTokens       RefreshToken[]
+  notifications       Notification[]
+  comments            Comment[]
+
+  @@index([tenantId])
+  @@index([email])
+  @@index([status])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// =================================================================================
+// MODULE REGISTRY
+// =================================================================================
+
+model Module {
+  id          String         @id @default(uuid())
+  tenantId    String
+  name        String
+  slug        String
+  category    ModuleCategory
+  description String?
+  version     String
+  status      ModuleStatus
+  ownerUserId String
+  tags        String[]       @default([])
+  metadata    Json?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  owner        User               @relation("ModuleOwner", fields: [ownerUserId], references: [id])
+  interfaces   ModuleInterface[]
+  dependencies ModuleDependency[] @relation("ModuleDependencies")
+  dependents   ModuleDependency[] @relation("ModuleDependents")
+  activities   ModuleActivity[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([status])
+  @@index([category])
+  @@index([ownerUserId])
+}
+
+model ModuleInterface {
+  id             String    @id @default(uuid())
+  moduleId       String
+  type           String
+  spec           Json
+  docUrl         String?
+  lastVerifiedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId])
+}
+
+model ModuleDependency {
+  id                String   @id @default(uuid())
+  moduleId          String
+  dependsOnModuleId String
+  relationType      String
+  createdAt         DateTime @default(now())
+
+  module          Module @relation("ModuleDependencies", fields: [moduleId], references: [id], onDelete: Cascade)
+  dependsOnModule Module @relation("ModuleDependents", fields: [dependsOnModuleId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, dependsOnModuleId])
+  @@index([moduleId])
+  @@index([dependsOnModuleId])
+}
+
+model ModuleActivity {
+  id        String   @id @default(uuid())
+  moduleId  String
+  userId    String?
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId])
+  @@index([createdAt])
+}
+
+// =================================================================================
+// ROADMAP & PROJECT MANAGEMENT
+// =================================================================================
+
+model Stage {
+  id          String      @id @default(uuid())
+  tenantId    String
+  index       Int
+  name        String
+  description String?
+  status      StageStatus
+  startDate   DateTime?
+  endDate     DateTime?
+  progress    Int         @default(0)
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tasks      Task[]
+  milestones Milestone[]
+
+  @@unique([tenantId, index])
+  @@index([tenantId])
+  @@index([status])
+}
+
+model Task {
+  id             String       @id @default(uuid())
+  tenantId       String
+  stageId        String
+  title          String
+  description    String?
+  assigneeId     String?
+  status         TaskStatus
+  priority       TaskPriority
+  dueDate        DateTime?
+  estimatedHours Int?
+  actualHours    Int?
+  tags           String[]     @default([])
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stage    Stage     @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  assignee User?     @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  comments Comment[]
+
+  @@index([tenantId])
+  @@index([stageId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([priority])
+}
+
+model Milestone {
+  id          String   @id @default(uuid())
+  tenantId    String
+  title       String
+  description String?
+  targetDate  DateTime
+  status      String
+  stageId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stage  Stage? @relation(fields: [stageId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([stageId])
+}
+
+// =================================================================================
+// ARCHITECTURE VISUALIZATION
+// =================================================================================
+
+model ComponentNode {
+  id           String        @id @default(uuid())
+  tenantId     String
+  name         String
+  type         ComponentType
+  description  String?
+  healthStatus HealthStatus
+  riskScore    Int           @default(0)
+  metadata     Json?
+  version      String?
+  tags         String[]      @default([])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  edgesFrom ComponentEdge[] @relation("EdgeFrom")
+  edgesTo   ComponentEdge[] @relation("EdgeTo")
+
+  @@index([tenantId])
+  @@index([healthStatus])
+  @@index([type])
+}
+
+model ComponentEdge {
+  id              String   @id @default(uuid())
+  tenantId        String
+  fromComponentId String
+  toComponentId   String
+  linkType        String
+  description     String?
+  createdAt       DateTime @default(now())
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fromComponent ComponentNode @relation("EdgeFrom", fields: [fromComponentId], references: [id], onDelete: Cascade)
+  toComponent   ComponentNode @relation("EdgeTo", fields: [toComponentId], references: [id], onDelete: Cascade)
+
+  @@unique([fromComponentId, toComponentId, linkType])
+  @@index([tenantId])
+  @@index([fromComponentId])
+  @@index([toComponentId])
+}
+
+// =================================================================================
+// SECURITY CENTER
+// =================================================================================
+
+model RiskItem {
+  id             String       @id @default(uuid())
+  tenantId       String
+  title          String
+  description    String?
+  category       String?
+  severity       RiskSeverity
+  likelihood     Int
+  impact         Int          @default(3)
+  riskScore      Int          @default(0)
+  ownerUserId    String?
+  status         RiskStatus
+  mitigationPlan String?
+  tags           String[]     @default([])
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  owner    User?         @relation("RiskOwner", fields: [ownerUserId], references: [id])
+  findings Finding[]
+  controls ControlRisk[]
+
+  @@index([tenantId])
+  @@index([severity])
+  @@index([status])
+  @@index([ownerUserId])
+}
+
+model Control {
+  id            String        @id @default(uuid())
+  tenantId      String
+  framework     String
+  controlId     String
+  title         String
+  description   String?
+  status        ControlStatus
+  evidenceLinks String[]      @default([])
+  tags          String[]      @default([])
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  risks  ControlRisk[]
+
+  @@unique([tenantId, framework, controlId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([framework])
+}
+
+model ControlRisk {
+  id         String   @id @default(uuid())
+  controlId  String
+  riskItemId String
+  createdAt  DateTime @default(now())
+
+  control  Control  @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  riskItem RiskItem @relation(fields: [riskItemId], references: [id], onDelete: Cascade)
+
+  @@unique([controlId, riskItemId])
+  @@index([controlId])
+  @@index([riskItemId])
+}
+
+model Finding {
+  id          String    @id @default(uuid())
+  tenantId    String
+  riskItemId  String
+  description String
+  source      String
+  severity    String?
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  riskItem RiskItem @relation(fields: [riskItemId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([riskItemId])
+  @@index([resolvedAt])
+}
+
+// =================================================================================
+// SIMULATION & TELEMETRY
+// =================================================================================
+
+model Simulation {
+  id              String             @id @default(uuid())
+  tenantId        String
+  name            String
+  description     String?
+  scenarioType    SimulationScenario
+  status          SimulationStatus
+  startedAt       DateTime?
+  endedAt         DateTime?
+  duration        Int?
+  tags            String[]           @default([])
+  metadata        Json?
+  createdByUserId String
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  tenant  Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  creator User              @relation("SimulationCreator", fields: [createdByUserId], references: [id])
+  events  SimulationEvent[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([scenarioType])
+  @@index([createdByUserId])
+}
+
+model SimulationEvent {
+  id           String        @id @default(uuid())
+  simulationId String
+  timestamp    DateTime      @default(now())
+  actor        String
+  actionType   String
+  description  String
+  severity     EventSeverity
+  metadata     Json?
+  tags         String[]      @default([])
+
+  simulation Simulation @relation(fields: [simulationId], references: [id], onDelete: Cascade)
+
+  @@index([simulationId])
+  @@index([timestamp])
+  @@index([severity])
+  @@index([actor])
+}
+
+// =================================================================================
+// BILLING & SUBSCRIPTIONS
+// =================================================================================
+
+model Plan {
+  id             String   @id @default(uuid())
+  tenantId       String?
+  code           String   @unique
+  name           String
+  description    String?
+  priceMonthly   Int
+  currency       String   @default("USD")
+  features       String[] @default([])
+  stripePriceId  String?
+  maxSeats       Int?
+  maxModules     Int?
+  maxSimulations Int?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id])
+  subscriptions Subscription[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  tenantId             String
+  userIdBillingOwner   String
+  planId               String
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  trialEnd             DateTime?
+  seats                Int                @default(1)
+  stripeSubscriptionId String?            @unique
+  stripeCustomerId     String?
+  metadata             Json?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  billingOwner User      @relation("SubscriptionOwner", fields: [userIdBillingOwner], references: [id])
+  plan         Plan      @relation(fields: [planId], references: [id])
+  invoices     Invoice[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([stripeCustomerId])
+}
+
+model Invoice {
+  id              String    @id @default(uuid())
+  subscriptionId  String
+  amount          Int
+  currency        String    @default("USD")
+  stripeInvoiceId String?   @unique
+  status          String
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([status])
+}
+
+// =================================================================================
+// DOCUMENTATION
+// =================================================================================
+
+model DocPage {
+  id              String   @id @default(uuid())
+  tenantId        String?
+  slug            String
+  title           String
+  contentMarkdown String
+  category        String?
+  language        String   @default("en")
+  version         String?
+  tags            String[]  @default([])
+  isPublic        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([slug, language])
+  @@index([tenantId])
+  @@index([category])
+  @@index([language])
+}
+
+// =================================================================================
+// SETTINGS & INTEGRATIONS
+// =================================================================================
+
+model IntegrationConfig {
+  id         String              @id @default(uuid())
+  tenantId   String
+  provider   IntegrationProvider
+  configJson Json
+  status     String              @default("ACTIVE")
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([provider])
+}
+
+model AppSetting {
+  id        String   @id @default(uuid())
+  tenantId  String
+  key       String
+  value     String
+  type      String   @default("STRING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+}
+
+// =================================================================================
+// AUDIT & NOTIFICATIONS
+// =================================================================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  tenantId  String
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  tenantId   String
+  authorId   String
+  entityType String
+  entityId   String
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  task   Task?  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([authorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
