@@ -1,0 +1,77 @@
+{
+  "app": {
+    "name": "کنترل ماموریت هایپریون-فلاکس",
+    "tagline": "پلتفرم پیشرفته عملیات سایبری"
+  },
+  "nav": {
+    "dashboard": "داشبورد",
+    "modules": "ماژول‌ها",
+    "roadmap": "نقشه راه",
+    "architecture": "معماری",
+    "security": "امنیت",
+    "simulation": "شبیه‌سازی",
+    "docs": "مستندات",
+    "settings": "تنظیمات",
+    "billing": "پرداخت"
+  },
+  "auth": {
+    "login": "ورود",
+    "logout": "خروج",
+    "register": "ثبت‌نام",
+    "email": "ایمیل",
+    "password": "رمز عبور",
+    "forgotPassword": "فراموشی رمز عبور؟",
+    "rememberMe": "مرا به خاطر بسپار"
+  },
+  "common": {
+    "loading": "در حال بارگذاری...",
+    "error": "خطا",
+    "success": "موفقیت",
+    "save": "ذخیره",
+    "cancel": "لغو",
+    "delete": "حذف",
+    "edit": "ویرایش",
+    "create": "ایجاد",
+    "update": "به‌روزرسانی",
+    "search": "جستجو",
+    "filter": "فیلتر",
+    "export": "خروجی",
+    "import": "ورودی",
+    "back": "بازگشت",
+    "next": "بعدی",
+    "previous": "قبلی"
+  },
+  "dashboard": {
+    "welcome": "به هایپریون-فلاکس خوش آمدید",
+    "overview": "نمای کلی سیستم",
+    "recentActivity": "فعالیت‌های اخیر",
+    "quickActions": "اقدامات سریع"
+  },
+  "modules": {
+    "title": "رجیستری ماژول",
+    "status": {
+      "draft": "پیش‌نویس",
+      "experimental": "آزمایشی",
+      "canary": "کاناری",
+      "stable": "پایدار",
+      "deprecated": "منسوخ"
+    }
+  },
+  "security": {
+    "title": "مرکز امنیت",
+    "risks": "ریسک‌ها",
+    "controls": "کنترل‌ها",
+    "findings": "یافته‌ها",
+    "severity": {
+      "low": "پایین",
+      "medium": "متوسط",
+      "high": "بالا",
+      "critical": "بحرانی"
+    }
+  },
+  "locale": {
+    "detectSuggestion": "ما منطقه شما را شناسایی کردیم. آیا می‌خواهید به {{language}} تغییر دهید؟",
+    "changeLanguage": "تغییر زبان",
+    "currentLanguage": "زبان فعلی"
+  }
+}
