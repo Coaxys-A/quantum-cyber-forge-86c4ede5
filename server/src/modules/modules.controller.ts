@@ -30,7 +30,8 @@ export class ModulesController {
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Create a new module (Admin only)' })
   create(@Body() createModuleDto: CreateModuleDto, @Request() req) {
-    return this.modulesService.create(createModuleDto, req.user.userId);
+    const tenantId = req.user.tenantId || req.tenantId;
+    return this.modulesService.create(tenantId, createModuleDto, req.user.userId);
   }
 
   @Get()
@@ -39,11 +40,13 @@ export class ModulesController {
   @ApiQuery({ name: 'category', required: false, enum: ModuleCategory })
   @ApiQuery({ name: 'search', required: false })
   findAll(
+    @Request() req,
     @Query('status') status?: ModuleStatus,
     @Query('category') category?: ModuleCategory,
     @Query('search') search?: string,
   ) {
-    return this.modulesService.findAll({ status, category, search });
+    const tenantId = req.user.tenantId || req.tenantId;
+    return this.modulesService.findAll(tenantId, { status, category, search });
   }
 
   @Get('stats')
