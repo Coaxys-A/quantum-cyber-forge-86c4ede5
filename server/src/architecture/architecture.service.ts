@@ -8,21 +8,25 @@ import { CreateEdgeDto } from './dto/create-edge.dto';
 export class ArchitectureService {
   constructor(private prisma: PrismaService) {}
 
-  async createComponent(createComponentDto: CreateComponentDto) {
-    return this.prisma.component.create({
-      data: createComponentDto,
+  async createComponent(tenantId: string, createComponentDto: CreateComponentDto) {
+    return this.prisma.componentNode.create({
+      data: {
+        ...createComponentDto,
+        tenantId,
+      },
     });
   }
 
-  async findAllComponents() {
-    return this.prisma.component.findMany({
+  async findAllComponents(tenantId: string) {
+    return this.prisma.componentNode.findMany({
+      where: { tenantId },
       include: {
-        outgoingEdges: {
+        edgesFrom: {
           include: {
             toComponent: true,
           },
         },
-        incomingEdges: {
+        edgesTo: {
           include: {
             fromComponent: true,
           },
@@ -34,16 +38,16 @@ export class ArchitectureService {
     });
   }
 
-  async findOneComponent(id: string) {
-    const component = await this.prisma.component.findUnique({
+  async findOneComponent(id: string, tenantId: string) {
+    const component = await this.prisma.componentNode.findUnique({
       where: { id },
       include: {
-        outgoingEdges: {
+        edgesFrom: {
           include: {
             toComponent: true,
           },
         },
-        incomingEdges: {
+        edgesTo: {
           include: {
             fromComponent: true,
           },
@@ -51,33 +55,36 @@ export class ArchitectureService {
       },
     });
 
-    if (!component) {
+    if (!component || component.tenantId !== tenantId) {
       throw new NotFoundException('Component not found');
     }
 
     return component;
   }
 
-  async updateComponent(id: string, updateComponentDto: UpdateComponentDto) {
-    await this.findOneComponent(id);
+  async updateComponent(id: string, tenantId: string, updateComponentDto: UpdateComponentDto) {
+    await this.findOneComponent(id, tenantId);
 
-    return this.prisma.component.update({
+    return this.prisma.componentNode.update({
       where: { id },
       data: updateComponentDto,
     });
   }
 
-  async removeComponent(id: string) {
-    await this.findOneComponent(id);
+  async removeComponent(id: string, tenantId: string) {
+    await this.findOneComponent(id, tenantId);
 
-    return this.prisma.component.delete({
+    return this.prisma.componentNode.delete({
       where: { id },
     });
   }
 
-  async createEdge(createEdgeDto: CreateEdgeDto) {
+  async createEdge(tenantId: string, createEdgeDto: CreateEdgeDto) {
     return this.prisma.componentEdge.create({
-      data: createEdgeDto,
+      data: {
+        ...createEdgeDto,
+        tenantId,
+      },
       include: {
         fromComponent: true,
         toComponent: true,
@@ -85,8 +92,9 @@ export class ArchitectureService {
     });
   }
 
-  async findAllEdges() {
+  async findAllEdges(tenantId: string) {
     return this.prisma.componentEdge.findMany({
+      where: { tenantId },
       include: {
         fromComponent: true,
         toComponent: true,
@@ -94,16 +102,27 @@ export class ArchitectureService {
     });
   }
 
-  async removeEdge(id: string) {
+  async removeEdge(id: string, tenantId: string) {
+    const edge = await this.prisma.componentEdge.findUnique({
+      where: { id },
+    });
+
+    if (!edge || edge.tenantId !== tenantId) {
+      throw new NotFoundException('Edge not found');
+    }
+
     return this.prisma.componentEdge.delete({
       where: { id },
     });
   }
 
-  async getArchitectureGraph() {
+  async getArchitectureGraph(tenantId: string) {
     const [components, edges] = await Promise.all([
-      this.prisma.component.findMany(),
+      this.prisma.componentNode.findMany({
+        where: { tenantId },
+      }),
       this.prisma.componentEdge.findMany({
+        where: { tenantId },
         include: {
           fromComponent: true,
           toComponent: true,
@@ -117,11 +136,13 @@ export class ArchitectureService {
     };
   }
 
-  async getHealthSummary() {
-    const components = await this.prisma.component.findMany();
+  async getHealthSummary(tenantId: string) {
+    const components = await this.prisma.componentNode.findMany({
+      where: { tenantId },
+    });
 
     const summary = components.reduce(
-      (acc, component) => {
+      (acc: Record<string, number>, component) => {
         acc[component.healthStatus] = (acc[component.healthStatus] || 0) + 1;
         return acc;
       },
@@ -132,7 +153,7 @@ export class ArchitectureService {
       total: components.length,
       byHealth: summary,
       averageRisk:
-        components.reduce((sum, c) => sum + c.riskScore, 0) / components.length || 0,
+        components.reduce((sum: number, c) => sum + c.riskScore, 0) / components.length || 0,
     };
   }
 }

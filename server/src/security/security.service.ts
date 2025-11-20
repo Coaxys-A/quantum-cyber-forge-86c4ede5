@@ -11,11 +11,13 @@ export class SecurityService {
   constructor(private prisma: PrismaService) {}
 
   // Risk Items
-  async createRisk(createRiskDto: CreateRiskDto, userId: string) {
+  async createRisk(tenantId: string, createRiskDto: CreateRiskDto, userId: string) {
     return this.prisma.riskItem.create({
       data: {
         ...createRiskDto,
+        tenantId,
         ownerUserId: userId,
+        riskScore: (createRiskDto.likelihood || 1) * (createRiskDto.impact || 1),
       },
       include: {
         owner: {
@@ -29,8 +31,8 @@ export class SecurityService {
     });
   }
 
-  async findAllRisks(filters?: { status?: string; severity?: string }) {
-    const where: any = {};
+  async findAllRisks(tenantId: string, filters?: { status?: string; severity?: string }) {
+    const where: any = { tenantId };
 
     if (filters?.status) {
       where.status = filters.status;
@@ -127,14 +129,17 @@ export class SecurityService {
   }
 
   // Controls
-  async createControl(createControlDto: CreateControlDto) {
+  async createControl(tenantId: string, createControlDto: CreateControlDto) {
     return this.prisma.control.create({
-      data: createControlDto,
+      data: {
+        ...createControlDto,
+        tenantId,
+      },
     });
   }
 
-  async findAllControls(filters?: { framework?: string; status?: string }) {
-    const where: any = {};
+  async findAllControls(tenantId: string, filters?: { framework?: string; status?: string }) {
+    const where: any = { tenantId };
 
     if (filters?.framework) {
       where.framework = filters.framework;
@@ -182,9 +187,12 @@ export class SecurityService {
   }
 
   // Findings
-  async createFinding(createFindingDto: CreateFindingDto) {
+  async createFinding(tenantId: string, createFindingDto: CreateFindingDto) {
     return this.prisma.finding.create({
-      data: createFindingDto,
+      data: {
+        ...createFindingDto,
+        tenantId,
+      },
       include: {
         riskItem: true,
       },
@@ -201,20 +209,23 @@ export class SecurityService {
   }
 
   // Dashboard
-  async getDashboard() {
+  async getDashboard(tenantId: string) {
     const [totalRisks, risksBySeverity, risksByStatus, totalControls, controlsByStatus] =
       await Promise.all([
-        this.prisma.riskItem.count(),
+        this.prisma.riskItem.count({ where: { tenantId } }),
         this.prisma.riskItem.groupBy({
+          where: { tenantId },
           by: ['severity'],
           _count: true,
         }),
         this.prisma.riskItem.groupBy({
+          where: { tenantId },
           by: ['status'],
           _count: true,
         }),
-        this.prisma.control.count(),
+        this.prisma.control.count({ where: { tenantId } }),
         this.prisma.control.groupBy({
+          where: { tenantId },
           by: ['status'],
           _count: true,
         }),
@@ -222,6 +233,7 @@ export class SecurityService {
 
     const topRisks = await this.prisma.riskItem.findMany({
       where: {
+        tenantId,
         status: { in: ['OPEN', 'IN_REVIEW'] },
       },
       orderBy: [

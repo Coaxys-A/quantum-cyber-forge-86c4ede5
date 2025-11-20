@@ -15,7 +15,14 @@ export class PaymentsService {
 
   async createCheckoutSession(userId: string, planId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     const plan = await this.prisma.plan.findUnique({ where: { id: planId } });
+    if (!plan || !plan.stripePriceId) {
+      throw new Error('Plan not found or invalid');
+    }
 
     const session = await this.stripeService.createCheckoutSession(
       user.email,
@@ -25,10 +32,21 @@ export class PaymentsService {
     return { url: session.url };
   }
 
-  async getUserSubscription(userId: string) {
-    return this.prisma.subscription.findUnique({
-      where: { userId },
+  async getUserSubscription(userId: string, tenantId: string) {
+    return this.prisma.subscription.findFirst({
+      where: {
+        userIdBillingOwner: userId,
+        tenantId,
+      },
       include: { plan: true, invoices: true },
+    });
+  }
+
+  async getTenantSubscription(tenantId: string) {
+    return this.prisma.subscription.findFirst({
+      where: { tenantId },
+      include: { plan: true, invoices: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

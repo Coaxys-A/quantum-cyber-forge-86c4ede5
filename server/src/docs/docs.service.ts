@@ -12,8 +12,12 @@ export class DocsService {
     });
   }
 
-  async findBySlug(slug: string) {
-    return this.prisma.docPage.findUnique({ where: { slug } });
+  async findBySlug(slug: string, language: string = 'en') {
+    return this.prisma.docPage.findUnique({
+      where: {
+        slug_language: { slug, language },
+      },
+    });
   }
 
   async search(query: string) {
