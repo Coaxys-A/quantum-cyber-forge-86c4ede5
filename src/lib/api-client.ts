@@ -109,6 +109,9 @@ class ApiClient {
         body: JSON.stringify({ refreshToken }),
       }),
     
+    me: () =>
+      this.request<any>('/auth/me'),
+    
     logout: () =>
       this.request('/auth/logout', {
         method: 'POST',
