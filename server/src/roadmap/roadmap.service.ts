@@ -11,17 +11,21 @@ export class RoadmapService {
   constructor(private prisma: PrismaService) {}
 
   // Stages
-  async createStage(createStageDto: CreateStageDto) {
+  async createStage(tenantId: string, createStageDto: CreateStageDto) {
     return this.prisma.stage.create({
-      data: createStageDto,
+      data: {
+        ...createStageDto,
+        tenantId,
+      },
       include: {
         tasks: true,
       },
     });
   }
 
-  async findAllStages() {
+  async findAllStages(tenantId: string) {
     const stages = await this.prisma.stage.findMany({
+      where: { tenantId },
       include: {
         tasks: {
           include: {
@@ -97,9 +101,12 @@ export class RoadmapService {
   }
 
   // Tasks
-  async createTask(createTaskDto: CreateTaskDto) {
+  async createTask(tenantId: string, createTaskDto: CreateTaskDto) {
     return this.prisma.task.create({
-      data: createTaskDto,
+      data: {
+        ...createTaskDto,
+        tenantId,
+      },
       include: {
         stage: true,
         assignee: {
@@ -112,8 +119,8 @@ export class RoadmapService {
     });
   }
 
-  async findAllTasks(filters?: { stageId?: string; status?: string }) {
-    const where: any = {};
+  async findAllTasks(tenantId: string, filters?: { stageId?: string; status?: string }) {
+    const where: any = { tenantId };
 
     if (filters?.stageId) {
       where.stageId = filters.stageId;
@@ -188,25 +195,30 @@ export class RoadmapService {
   }
 
   // Milestones
-  async createMilestone(createMilestoneDto: CreateMilestoneDto) {
+  async createMilestone(tenantId: string, createMilestoneDto: CreateMilestoneDto) {
     return this.prisma.milestone.create({
-      data: createMilestoneDto,
+      data: {
+        ...createMilestoneDto,
+        tenantId,
+      },
     });
   }
 
-  async findAllMilestones() {
+  async findAllMilestones(tenantId: string) {
     return this.prisma.milestone.findMany({
+      where: { tenantId },
       orderBy: {
         targetDate: 'asc',
       },
     });
   }
 
-  async getRoadmapStats() {
+  async getRoadmapStats(tenantId: string) {
     const [totalStages, totalTasks, tasksByStatus] = await Promise.all([
-      this.prisma.stage.count(),
-      this.prisma.task.count(),
+      this.prisma.stage.count({ where: { tenantId } }),
+      this.prisma.task.count({ where: { tenantId } }),
       this.prisma.task.groupBy({
+        where: { tenantId },
         by: ['status'],
         _count: true,
       }),

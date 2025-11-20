@@ -6,17 +6,20 @@ import { CreateSimulationDto } from './dto/create-simulation.dto';
 export class SimulationService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createSimulationDto: CreateSimulationDto) {
+  async create(tenantId: string, createSimulationDto: CreateSimulationDto, userId: string) {
     return this.prisma.simulation.create({
       data: {
         ...createSimulationDto,
-        status: 'PENDING',
+        tenantId,
+        createdByUserId: userId,
+        status: 'DRAFT',
       },
     });
   }
 
-  async findAll() {
+  async findAll(tenantId: string) {
     return this.prisma.simulation.findMany({
+      where: { tenantId },
       include: {
         _count: {
           select: { events: true },
@@ -26,8 +29,8 @@ export class SimulationService {
     });
   }
 
-  async findOne(id: string) {
-    return this.prisma.simulation.findUnique({
+  async findOne(id: string, tenantId: string) {
+    const simulation = await this.prisma.simulation.findUnique({
       where: { id },
       include: {
         events: {
@@ -36,9 +39,15 @@ export class SimulationService {
         },
       },
     });
+
+    if (!simulation || simulation.tenantId !== tenantId) {
+      throw new Error('Simulation not found');
+    }
+
+    return simulation;
   }
 
-  async start(id: string) {
+  async start(id: string, tenantId: string) {
     const simulation = await this.prisma.simulation.update({
       where: { id },
       data: {
@@ -47,13 +56,25 @@ export class SimulationService {
       },
     });
 
+    if (simulation.tenantId !== tenantId) {
+      throw new Error('Unauthorized');
+    }
+
     // Seed initial mock events
     await this.seedMockEvents(id);
 
     return simulation;
   }
 
-  async stop(id: string) {
+  async stop(id: string, tenantId: string) {
+    const simulation = await this.prisma.simulation.findUnique({
+      where: { id },
+    });
+
+    if (!simulation || simulation.tenantId !== tenantId) {
+      throw new Error('Simulation not found');
+    }
+
     return this.prisma.simulation.update({
       where: { id },
       data: {
@@ -79,7 +100,15 @@ export class SimulationService {
     });
   }
 
-  async getEvents(simulationId: string) {
+  async getEvents(simulationId: string, tenantId: string) {
+    const simulation = await this.prisma.simulation.findUnique({
+      where: { id: simulationId },
+    });
+
+    if (!simulation || simulation.tenantId !== tenantId) {
+      throw new Error('Unauthorized');
+    }
+
     return this.prisma.simulationEvent.findMany({
       where: { simulationId },
       orderBy: { timestamp: 'desc' },

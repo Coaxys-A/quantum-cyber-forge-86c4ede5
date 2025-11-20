@@ -8,12 +8,15 @@ import { ModuleStatus, ModuleCategory } from '@prisma/client';
 export class ModulesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createModuleDto: CreateModuleDto, userId: string) {
-    const { name, slug, category, version, status, description } = createModuleDto;
-
-    // Check if slug already exists
+  async create(tenantId: string, createModuleDto: CreateModuleDto, userId: string) {
+    // Ensure slug is unique for this tenant
     const existing = await this.prisma.module.findUnique({
-      where: { slug },
+      where: {
+        tenantId_slug: {
+          tenantId,
+          slug: createModuleDto.slug,
+        },
+      },
     });
 
     if (existing) {
@@ -22,34 +25,34 @@ export class ModulesService {
 
     return this.prisma.module.create({
       data: {
-        name,
-        slug,
-        category,
-        version,
-        status: status || ModuleStatus.IN_DEV,
-        description,
+        ...createModuleDto,
+        tenantId,
         ownerUserId: userId,
+        status: createModuleDto.status || ModuleStatus.DRAFT,
       },
       include: {
         owner: {
           select: {
             id: true,
             email: true,
-            role: true,
           },
         },
         interfaces: true,
-        endpoints: true,
+        dependencies: true,
+        activities: true,
       },
     });
   }
 
-  async findAll(filters?: {
-    status?: ModuleStatus;
-    category?: ModuleCategory;
-    search?: string;
-  }) {
-    const where: any = {};
+  async findAll(
+    tenantId: string,
+    filters?: {
+      status?: ModuleStatus;
+      category?: ModuleCategory;
+      search?: string;
+    },
+  ) {
+    const where: any = { tenantId };
 
     if (filters?.status) {
       where.status = filters.status;
@@ -73,13 +76,18 @@ export class ModulesService {
           select: {
             id: true,
             email: true,
-            role: true,
+          },
+        },
+        interfaces: {
+          select: {
+            id: true,
+            type: true,
           },
         },
         _count: {
           select: {
-            interfaces: true,
-            endpoints: true,
+            dependencies: true,
+            activities: true,
           },
         },
       },
@@ -97,11 +105,24 @@ export class ModulesService {
           select: {
             id: true,
             email: true,
-            role: true,
           },
         },
         interfaces: true,
-        endpoints: true,
+        dependencies: {
+          include: {
+            dependsOnModule: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+        activities: {
+          take: 20,
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
@@ -112,19 +133,37 @@ export class ModulesService {
     return module;
   }
 
-  async findBySlug(slug: string) {
+  async findBySlug(tenantId: string, slug: string) {
     const module = await this.prisma.module.findUnique({
-      where: { slug },
+      where: {
+        tenantId_slug: {
+          tenantId,
+          slug,
+        },
+      },
       include: {
         owner: {
           select: {
             id: true,
             email: true,
-            role: true,
           },
         },
         interfaces: true,
-        endpoints: true,
+        dependencies: {
+          include: {
+            dependsOnModule: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+        activities: {
+          take: 20,
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
@@ -146,11 +185,11 @@ export class ModulesService {
           select: {
             id: true,
             email: true,
-            role: true,
           },
         },
         interfaces: true,
-        endpoints: true,
+        dependencies: true,
+        activities: true,
       },
     });
   }
@@ -163,14 +202,16 @@ export class ModulesService {
     });
   }
 
-  async getStats() {
+  async getStats(tenantId: string) {
     const [total, byStatus, byCategory] = await Promise.all([
-      this.prisma.module.count(),
+      this.prisma.module.count({ where: { tenantId } }),
       this.prisma.module.groupBy({
+        where: { tenantId },
         by: ['status'],
         _count: true,
       }),
       this.prisma.module.groupBy({
+        where: { tenantId },
         by: ['category'],
         _count: true,
       }),

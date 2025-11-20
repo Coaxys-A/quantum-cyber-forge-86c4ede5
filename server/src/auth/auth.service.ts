@@ -17,7 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto, tenantId: string) {
     const { email, password, role } = registerDto;
 
     // Check if user exists
@@ -38,9 +38,11 @@ export class AuthService {
         email,
         hashedPassword,
         role: role || 'VIEWER',
+        tenantId,
       },
       select: {
         id: true,
+        tenantId: true,
         email: true,
         role: true,
         createdAt: true,
@@ -48,7 +50,7 @@ export class AuthService {
     });
 
     // Generate tokens
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.tenantId, user.email, user.role);
 
     return {
       user,
@@ -68,6 +70,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Update last login
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
 
@@ -76,11 +84,12 @@ export class AuthService {
     }
 
     // Generate tokens
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.tenantId, user.email, user.role);
 
     return {
       user: {
         id: user.id,
+        tenantId: user.tenantId,
         email: user.email,
         role: user.role,
       },
@@ -121,7 +130,7 @@ export class AuthService {
     });
 
     // Generate new tokens
-    return this.generateTokens(user.id, user.email, user.role);
+    return this.generateTokens(user.id, user.tenantId, user.email, user.role);
   }
 
   async logout(userId: string) {
@@ -133,8 +142,8 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
-  private async generateTokens(userId: string, email: string, role: string) {
-    const payload = { sub: userId, email, role };
+  private async generateTokens(userId: string, tenantId: string, email: string, role: string) {
+    const payload = { sub: userId, tenantId, email, role };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -171,10 +180,16 @@ export class AuthService {
       where: { id: userId },
       select: {
         id: true,
+        tenantId: true,
         email: true,
         role: true,
+        status: true,
       },
     });
+
+    if (user && user.status !== 'ACTIVE') {
+      return null;
+    }
 
     return user;
   }
