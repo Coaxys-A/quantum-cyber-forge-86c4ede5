@@ -1,5 +1,11 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Landing from '@/pages/Landing';
+import Pricing from '@/pages/Pricing';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
+import Privacy from '@/pages/Privacy';
+import Terms from '@/pages/Terms';
 
 // Lazy load subdomain shells
 const AppShell = lazy(() => import('@/app-shells/app/AppShell'));
@@ -9,37 +15,25 @@ const BlogShell = lazy(() => import('@/app-shells/blog/BlogShell'));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-background">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    <div className="relative">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border-b-2 border-primary opacity-25"></div>
+    </div>
   </div>
 );
 
 export const AppRouter = () => {
-  const location = useLocation();
-  
-  // Determine subdomain from path in dev or hostname in prod
-  const getSubdomain = () => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname.includes('dashboard.')) return 'dashboard';
-      if (hostname.includes('docs.')) return 'docs';
-      if (hostname.includes('blog.')) return 'blog';
-      if (hostname.includes('app.')) return 'app';
-    }
-    
-    // Dev mode: use path prefix
-    if (location.pathname.startsWith('/dashboard')) return 'dashboard';
-    if (location.pathname.startsWith('/docs')) return 'docs';
-    if (location.pathname.startsWith('/blog')) return 'blog';
-    if (location.pathname.startsWith('/app')) return 'app';
-    
-    return 'app'; // default
-  };
-
-  const subdomain = getSubdomain();
-
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        
         {/* Dashboard subdomain */}
         <Route path="/dashboard/*" element={<DashboardShell />} />
         
@@ -52,19 +46,8 @@ export const AppRouter = () => {
         {/* App subdomain */}
         <Route path="/app/*" element={<AppShell />} />
         
-        {/* Root redirect based on subdomain */}
-        <Route 
-          path="/" 
-          element={
-            subdomain === 'dashboard' ? <Navigate to="/dashboard/overview" replace /> :
-            subdomain === 'docs' ? <Navigate to="/docs" replace /> :
-            subdomain === 'blog' ? <Navigate to="/blog" replace /> :
-            <Navigate to="/app/login" replace />
-          } 
-        />
-        
-        {/* Catch all */}
-        <Route path="*" element={<Navigate to={`/${subdomain}`} replace />} />
+        {/* Catch all - redirect to landing */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   );
