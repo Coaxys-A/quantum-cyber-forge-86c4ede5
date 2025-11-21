@@ -229,6 +229,119 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ planId }),
     }),
+    createUSDTPayment: (planId: string) => this.request<any>('/payments/usdt/create', {
+      method: 'POST',
+      body: JSON.stringify({ planId }),
+    }),
+    verifyUSDTPayment: (paymentId: string, txHash: string) => this.request<any>('/payments/usdt/verify', {
+      method: 'POST',
+      body: JSON.stringify({ paymentId, txHash }),
+    }),
+  };
+
+  // AI endpoints
+  ai = {
+    chat: (message: string, context?: any) => this.request<any>('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, context }),
+    }),
+    analyze: (type: string, data: any) => this.request<any>('/ai/analyze', {
+      method: 'POST',
+      body: JSON.stringify({ type, data }),
+    }),
+    securityAnalysis: (riskId: string) => this.request<any>(`/ai/security/${riskId}`, {
+      method: 'POST',
+    }),
+    architectureAnalysis: (componentId: string) => this.request<any>(`/ai/architecture/${componentId}`, {
+      method: 'POST',
+    }),
+    aptSimulation: (scenario: string) => this.request<any>('/ai/apt/simulate', {
+      method: 'POST',
+      body: JSON.stringify({ scenario }),
+    }),
+    complianceCheck: (framework: string) => this.request<any>('/ai/compliance/check', {
+      method: 'POST',
+      body: JSON.stringify({ framework }),
+    }),
+    devsecopsAdvice: (repoUrl?: string) => this.request<any>('/ai/devsecops/advice', {
+      method: 'POST',
+      body: JSON.stringify({ repoUrl }),
+    }),
+  };
+
+  // Tenants endpoints
+  tenants = {
+    list: () => this.request<any[]>('/tenants'),
+    get: (id: string) => this.request<any>(`/tenants/${id}`),
+    create: (data: any) => this.request<any>('/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: string, data: any) => this.request<any>(`/tenants/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  };
+
+  // Notifications endpoints
+  notifications = {
+    list: () => this.request<any[]>('/notifications'),
+    markRead: (id: string) => this.request<any>(`/notifications/${id}/read`, {
+      method: 'PATCH',
+    }),
+    markAllRead: () => this.request<any>('/notifications/read-all', {
+      method: 'PATCH',
+    }),
+  };
+
+  // Audit logs endpoints
+  auditLogs = {
+    list: (params?: { action?: string; resourceType?: string }) =>
+      this.request<any[]>('/audit-logs', { params }),
+  };
+
+  // Hypervisor endpoints
+  hypervisor = {
+    dashboard: () => this.request<any>('/hypervisor/dashboard'),
+    tenants: () => this.request<any[]>('/hypervisor/tenants'),
+    users: () => this.request<any[]>('/hypervisor/users'),
+    impersonate: (userId: string) => this.request<{ token: string }>('/hypervisor/impersonate', {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+    }),
+    analytics: () => this.request<any>('/hypervisor/analytics'),
+  };
+
+  // Findings endpoints
+  findings = {
+    list: () => this.request<any[]>('/findings'),
+    get: (id: string) => this.request<any>(`/findings/${id}`),
+    create: (data: any) => this.request<any>('/findings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: string, data: any) => this.request<any>(`/findings/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  };
+
+  // Compliance endpoints
+  compliance = {
+    frameworks: () => this.request<any[]>('/compliance/frameworks'),
+    check: (framework: string) => this.request<any>('/compliance/check', {
+      method: 'POST',
+      body: JSON.stringify({ framework }),
+    }),
+  };
+
+  // DevSecOps endpoints
+  devsecops = {
+    scan: (repoUrl?: string) => this.request<any>('/devsecops/scan', {
+      method: 'POST',
+      body: JSON.stringify({ repositoryUrl: repoUrl }),
+    }),
+    reports: () => this.request<any[]>('/devsecops/reports'),
   };
 }
 
