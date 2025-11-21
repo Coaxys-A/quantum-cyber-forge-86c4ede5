@@ -73,10 +73,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setRoles(rolesData || []);
     } catch (error: any) {
-      console.error('Error refreshing profile:', error);
+      // Don't log sensitive profile data
       toast({
         title: 'Error loading profile',
-        description: error.message,
+        description: 'Unable to load profile data. Please refresh the page.',
         variant: 'destructive'
       });
     }
@@ -133,9 +133,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
+        // Sanitized error message - don't expose internal details
+        const userMessage = error.message.includes('already registered')
+          ? 'This email is already registered. Please sign in instead.'
+          : 'Unable to create account. Please check your information and try again.';
+        
         toast({
           title: 'Sign up failed',
-          description: error.message,
+          description: userMessage,
           variant: 'destructive'
         });
       } else {
@@ -147,6 +152,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       return { error };
     } catch (error: any) {
+      toast({
+        title: 'Sign up failed',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive'
+      });
       return { error };
     }
   };
@@ -159,15 +169,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
+        // Sanitized error message - don't expose internal details
+        const userMessage = 'Invalid email or password. Please try again.';
+        
         toast({
           title: 'Sign in failed',
-          description: error.message,
+          description: userMessage,
           variant: 'destructive'
         });
       }
 
       return { error };
     } catch (error: any) {
+      toast({
+        title: 'Sign in failed',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive'
+      });
       return { error };
     }
   };
@@ -180,10 +198,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setProfile(null);
       setRoles([]);
     } catch (error: any) {
-      console.error('Sign out error:', error);
+      // Don't expose internal error details
       toast({
         title: 'Sign out failed',
-        description: error.message,
+        description: 'Unable to sign out. Please try again.',
         variant: 'destructive'
       });
     }

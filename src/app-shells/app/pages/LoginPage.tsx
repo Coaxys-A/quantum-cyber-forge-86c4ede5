@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Loader2 } from 'lucide-react';
+import { loginSchema } from '@/lib/validation';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -22,10 +24,17 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const errors = validation.error.issues;
+      toast.error(errors[0].message);
+      return;
+    }
+
     setLoading(true);
-
     const { error } = await signIn(email, password);
-
     setLoading(false);
 
     if (!error) {

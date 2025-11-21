@@ -7,10 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Mail, MessageSquare, Send } from 'lucide-react';
 import { Footer } from '@/components/Footer';
-import { useToast } from '@/hooks/use-toast';
+import { contactSchema } from '@/lib/validation';
+import { toast } from 'sonner';
 
 export default function Contact() {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -21,16 +21,26 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const validation = contactSchema.safeParse({ 
+      name: formData.name, 
+      email: formData.email, 
+      message: formData.message 
+    });
+    
+    if (!validation.success) {
+      const errors = validation.error.issues;
+      toast.error(errors[0].message);
+      return;
+    }
+
     setLoading(true);
 
     // Simulate sending message
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    toast({
-      title: 'Message sent!',
-      description: 'We\'ll get back to you as soon as possible.'
-    });
-
+    toast.success('Message sent! We\'ll get back to you as soon as possible.');
     setFormData({ name: '', email: '', subject: '', message: '' });
     setLoading(false);
   };

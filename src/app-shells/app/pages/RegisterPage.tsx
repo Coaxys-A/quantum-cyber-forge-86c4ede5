@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Loader2 } from 'lucide-react';
+import { registerSchema } from '@/lib/validation';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -15,7 +17,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   // Redirect if already logged in
   if (user) {
@@ -25,27 +26,28 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+    
+    // Validate input
+    const validation = registerSchema.safeParse({ 
+      email, 
+      password, 
+      confirmPassword, 
+      fullName 
+    });
+    
+    if (!validation.success) {
+      const errors = validation.error.issues;
+      toast.error(errors[0].message);
       return;
     }
 
     setLoading(true);
-
     const { error: signUpError } = await signUp(email, password, fullName);
-
     setLoading(false);
 
     if (!signUpError) {
-      // Success message is shown in toast
-      // User will be redirected after email verification
+      // Success - redirect will happen after verification
+      navigate('/app/dashboard');
     }
   };
 
@@ -68,12 +70,6 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {error && (
-              <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md animate-fade-in">
-                {error}
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
@@ -115,7 +111,7 @@ export default function RegisterPage() {
                 className="transition-all duration-200 focus:scale-[1.02]"
               />
               <p className="text-xs text-muted-foreground">
-                Must be at least 8 characters
+                Must be 8+ characters with uppercase, lowercase, number, and special character
               </p>
             </div>
 
