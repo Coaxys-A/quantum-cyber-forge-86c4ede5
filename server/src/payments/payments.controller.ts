@@ -1,12 +1,11 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request, RawBodyRequest, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantId } from '../common/decorators/tenant.decorator';
 import { PaymentsService } from './payments.service';
 
 @ApiTags('payments')
 @Controller('payments')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class PaymentsController {
   constructor(private paymentsService: PaymentsService) {}
 
@@ -16,12 +15,51 @@ export class PaymentsController {
   }
 
   @Post('checkout')
-  createCheckout(@Request() req, @Body() body: { planId: string }) {
-    return this.paymentsService.createCheckoutSession(req.user.userId, body.planId);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  createCheckout(
+    @Request() req,
+    @TenantId() tenantId: string,
+    @Body() body: { planId: string },
+  ) {
+    return this.paymentsService.createCheckoutSession(
+      req.user.userId,
+      tenantId,
+      body.planId,
+    );
+  }
+
+  @Post('usdt/create')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  createUSDTPayment(
+    @Request() req,
+    @TenantId() tenantId: string,
+    @Body() body: { planId: string },
+  ) {
+    return this.paymentsService.createUSDTPayment(
+      req.user.userId,
+      tenantId,
+      body.planId,
+    );
+  }
+
+  @Post('usdt/verify')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  verifyUSDTPayment(@Body() body: { paymentId: string; txHash: string }) {
+    return this.paymentsService.verifyUSDTPayment(body.paymentId, body.txHash);
   }
 
   @Get('subscription')
-  getSubscription(@Request() req) {
-    return this.paymentsService.getUserSubscription(req.user.userId);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  getSubscription(@Request() req, @TenantId() tenantId: string) {
+    return this.paymentsService.getUserSubscription(req.user.userId, tenantId);
+  }
+
+  @Post('webhook/stripe')
+  async handleStripeWebhook(@Req() req: RawBodyRequest<Request>) {
+    return this.paymentsService.handleStripeWebhook(req.body);
   }
 }

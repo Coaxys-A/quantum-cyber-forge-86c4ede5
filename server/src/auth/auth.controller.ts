@@ -24,7 +24,9 @@ export class AuthController {
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @ApiOperation({ summary: 'Register a new user' })
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    // For registration, tenantId will be created or provided
+    const tenantId = registerDto.tenantId || 'default'; // This should be handled properly
+    return this.authService.register(registerDto, tenantId);
   }
 
   @Post('login')
