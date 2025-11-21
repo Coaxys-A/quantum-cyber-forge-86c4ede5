@@ -15,6 +15,53 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Light Mode (Default) */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 189 94% 43%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 189 94% 43%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 189 94% 43%;
+
+    --radius: 0.75rem;
+
+    --cyber-glow: 189 94% 43%;
+    --cyber-secondary: 187 85% 53%;
+    --cyber-amber: 43 96% 56%;
+    --cyber-grid: 210 40% 96%;
+
+    --gradient-radial: radial-gradient(circle at 50% 50%, hsl(189 94% 43% / 0.08), transparent 70%);
+    --gradient-cyber: linear-gradient(135deg, hsl(189 94% 43% / 0.1), hsl(187 85% 53% / 0.05));
+    
+    --shadow-glow: 0 0 40px hsl(var(--cyber-glow) / 0.15);
+    --shadow-card: 0 4px 20px hsl(222 47% 11% / 0.1);
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    /* Dark Mode */
     --background: 222 47% 5%;
     --foreground: 210 40% 98%;
 
@@ -43,8 +90,6 @@ All colors MUST be HSL.
     --input: 217 33% 17%;
     --ring: 189 94% 43%;
 
-    --radius: 0.75rem;
-
     --cyber-glow: 189 94% 43%;
     --cyber-secondary: 187 85% 53%;
     --cyber-amber: 43 96% 56%;
@@ -55,8 +100,6 @@ All colors MUST be HSL.
     
     --shadow-glow: 0 0 40px hsl(var(--cyber-glow) / 0.3);
     --shadow-card: 0 4px 20px hsl(222 47% 2% / 0.5);
-    
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 

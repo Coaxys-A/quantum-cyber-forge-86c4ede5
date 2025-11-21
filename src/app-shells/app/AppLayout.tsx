@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { HypervisorBadge } from '@/components/HypervisorBadge';
 
 interface NavItem {
   to: string;
@@ -69,6 +71,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           
           <div className="flex-1" />
           
+          <HypervisorBadge />
+          <ThemeToggle />
           <LocaleSwitcher />
           
           <div className="flex items-center gap-2">
