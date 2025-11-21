@@ -29,7 +29,7 @@ interface NavItem {
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems: NavItem[] = [
@@ -46,7 +46,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   ];
 
   const handleLogout = async () => {
-    await logout();
+    await signOut();
   };
 
   return (
@@ -73,9 +73,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:inline">
-              {user?.email}
+              {profile?.full_name || user?.email}
             </span>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <Button variant="ghost" size="icon" onClick={handleLogout} title="Sign out">
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

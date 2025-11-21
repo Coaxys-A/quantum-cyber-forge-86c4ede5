@@ -1,60 +1,49 @@
-import { Shield } from "lucide-react";
+import { Link } from 'react-router-dom';
+import { Shield } from 'lucide-react';
 
 export const Footer = () => {
   return (
-    <footer className="border-t border-border/50 py-12 bg-card/30">
-      <div className="container px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Shield className="w-6 h-6 text-primary animate-pulse-glow" />
-              <span className="font-bold text-lg">Hyperion-Flux</span>
-            </div>
+    <footer className="border-t border-border/50 bg-background/95 backdrop-blur">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1">
+            <Link to="/" className="flex items-center gap-2 mb-4">
+              <Shield className="h-6 w-6 text-primary" />
+              <span className="font-bold">Hyperion-Flux</span>
+            </Link>
             <p className="text-sm text-muted-foreground">
-              Next-generation cyber operations platform for the post-quantum era.
+              Advanced cyber operations platform for global enterprises.
             </p>
           </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold">Platform</h4>
+          
+          <div>
+            <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Architecture</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Modules</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Security</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Integrations</a></li>
+              <li><Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
+              <li><Link to="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
+              <li><Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
             </ul>
           </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold">Resources</h4>
+          
+          <div>
+            <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">API Reference</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Guides</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
+              <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
+              <li><Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
             </ul>
           </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold">Company</h4>
+          
+          <div>
+            <h3 className="font-semibold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
+              <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link></li>
+              <li><Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link></li>
             </ul>
           </div>
         </div>
-
-        <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © 2025 Hyperion-Flux. Built for the post-quantum era.
-          </p>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms</a>
-            <a href="#" className="hover:text-primary transition-colors">License</a>
-          </div>
+        
+        <div className="mt-8 pt-8 border-t border-border/50 text-center text-sm text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} Hyperion-Flux. All rights reserved.</p>
         </div>
       </div>
     </footer>
