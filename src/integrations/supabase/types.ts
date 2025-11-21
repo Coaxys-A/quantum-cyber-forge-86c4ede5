@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          resource_id: string | null
+          resource_type: string
+          tenant_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type: string
+          tenant_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          tenant_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -490,6 +537,8 @@ export type Database = {
           full_name: string | null
           id: string
           language: string | null
+          preferred_language: string | null
+          status: string | null
           tenant_id: string | null
           timezone: string | null
           updated_at: string | null
@@ -501,6 +550,8 @@ export type Database = {
           full_name?: string | null
           id: string
           language?: string | null
+          preferred_language?: string | null
+          status?: string | null
           tenant_id?: string | null
           timezone?: string | null
           updated_at?: string | null
@@ -512,6 +563,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           language?: string | null
+          preferred_language?: string | null
+          status?: string | null
           tenant_id?: string | null
           timezone?: string | null
           updated_at?: string | null
