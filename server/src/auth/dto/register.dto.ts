@@ -11,8 +11,8 @@ export class RegisterDto {
   @MinLength(8)
   password: string;
 
-  @ApiProperty({ enum: ['ADMIN', 'OPS', 'VIEWER'], required: false })
+  @ApiProperty({ enum: ['HYPERVISOR', 'PLATFORM_ADMIN', 'ADMIN', 'OPS', 'VIEWER', 'BILLING_OWNER'], required: false })
   @IsOptional()
-  @IsEnum(['ADMIN', 'OPS', 'VIEWER'])
-  role?: 'ADMIN' | 'OPS' | 'VIEWER';
+  @IsEnum(['HYPERVISOR', 'PLATFORM_ADMIN', 'ADMIN', 'OPS', 'VIEWER', 'BILLING_OWNER'])
+  role?: 'HYPERVISOR' | 'PLATFORM_ADMIN' | 'ADMIN' | 'OPS' | 'VIEWER' | 'BILLING_OWNER';
 }

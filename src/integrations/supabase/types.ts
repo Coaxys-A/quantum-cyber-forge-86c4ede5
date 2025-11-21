@@ -949,9 +949,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_hypervisor: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "PLATFORM_ADMIN" | "ADMIN" | "OPS" | "VIEWER" | "BILLING_OWNER"
+      app_role:
+        | "PLATFORM_ADMIN"
+        | "ADMIN"
+        | "OPS"
+        | "VIEWER"
+        | "BILLING_OWNER"
+        | "HYPERVISOR"
       component_type:
         | "SERVICE"
         | "DATABASE"
@@ -974,7 +981,13 @@ export type Database = {
         | "CANARY"
         | "STABLE"
         | "DEPRECATED"
-      plan_tier: "FREE" | "PLUS" | "PRO" | "ULTRA" | "ENTERPRISE"
+      plan_tier:
+        | "FREE"
+        | "PLUS"
+        | "PRO"
+        | "ULTRA"
+        | "ENTERPRISE"
+        | "ENTERPRISE_PLUS"
       risk_severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
       risk_status:
         | "IDENTIFIED"
@@ -1124,7 +1137,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["PLATFORM_ADMIN", "ADMIN", "OPS", "VIEWER", "BILLING_OWNER"],
+      app_role: [
+        "PLATFORM_ADMIN",
+        "ADMIN",
+        "OPS",
+        "VIEWER",
+        "BILLING_OWNER",
+        "HYPERVISOR",
+      ],
       component_type: [
         "SERVICE",
         "DATABASE",
@@ -1150,7 +1170,14 @@ export const Constants = {
         "STABLE",
         "DEPRECATED",
       ],
-      plan_tier: ["FREE", "PLUS", "PRO", "ULTRA", "ENTERPRISE"],
+      plan_tier: [
+        "FREE",
+        "PLUS",
+        "PRO",
+        "ULTRA",
+        "ENTERPRISE",
+        "ENTERPRISE_PLUS",
+      ],
       risk_severity: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
       risk_status: [
         "IDENTIFIED",

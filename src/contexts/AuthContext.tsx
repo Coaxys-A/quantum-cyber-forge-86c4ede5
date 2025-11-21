@@ -208,6 +208,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const hasRole = (role: string): boolean => {
+    // Support both HYPERVISOR and other roles
+    if (role === 'HYPERVISOR') {
+      return roles.some(r => r.role === 'HYPERVISOR');
+    }
     return roles.some(r => r.role === role);
   };
 

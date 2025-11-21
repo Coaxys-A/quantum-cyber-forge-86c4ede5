@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Zap, Globe, Lock, BarChart3, Users, ArrowRight, Check } from 'lucide-react';
 import { Footer } from '@/components/Footer';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 
 export default function Landing() {
   const features = [
@@ -68,6 +70,8 @@ export default function Landing() {
             <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Pricing
             </Link>
+            <ThemeToggle />
+            <LocaleSwitcher />
             <Link to="/app/login">
               <Button variant="ghost" size="sm">Sign In</Button>
             </Link>

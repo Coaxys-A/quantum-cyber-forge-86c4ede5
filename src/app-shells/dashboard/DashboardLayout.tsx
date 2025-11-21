@@ -1,15 +1,20 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutDashboard, Users, Server, DollarSign, Activity, FileText } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background">
-        <div className="flex h-16 items-center px-4">
+        <div className="flex h-16 items-center px-4 gap-4">
           <Link to="/dashboard/overview" className="font-bold text-xl">
             Platform Dashboard
           </Link>
+          <div className="flex-1" />
+          <ThemeToggle />
+          <LocaleSwitcher />
         </div>
       </header>
 
