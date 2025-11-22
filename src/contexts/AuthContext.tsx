@@ -49,7 +49,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const HYPERVISOR_EMAIL = 'arsam12sb@gmail.com';
+import { HYPERVISOR_EMAIL, PLAN_IDS } from '@/lib/config';
+
+const HYPERVISOR_TENANT_ID = '00000000-0000-4000-8000-000000000001';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -108,6 +110,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .maybeSingle();
 
         setSubscription(subData);
+        
+        // Ensure hypervisor always gets Enterprise Plus plan
+        if (user.email === HYPERVISOR_EMAIL && (!subData || subData.plan_id !== PLAN_IDS.ENTERPRISE_PLUS)) {
+          console.log('[AUTH] Hypervisor detected but subscription missing/wrong - creating it');
+          
+          // Attempt to create/update hypervisor subscription
+          await supabase
+            .from('subscriptions')
+            .upsert({
+              tenant_id: HYPERVISOR_TENANT_ID,
+              plan_id: PLAN_IDS.ENTERPRISE_PLUS,
+              status: 'active',
+              billing_cycle: 'monthly',
+            }, {
+              onConflict: 'tenant_id'
+            });
+        }
       }
 
       // Debug info for hypervisor
