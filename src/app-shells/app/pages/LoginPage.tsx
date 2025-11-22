@@ -179,6 +179,11 @@ export default function LoginPage() {
                 Sign up
               </Link>
             </p>
+            <p className="text-sm text-center text-muted-foreground">
+              <Link to="/app/forgot-password" className="text-primary hover:underline font-medium">
+                Forgot your password?
+              </Link>
+            </p>
 
             <Link to="/" className="text-sm text-center text-muted-foreground hover:text-foreground transition-colors">
               ← Back to home

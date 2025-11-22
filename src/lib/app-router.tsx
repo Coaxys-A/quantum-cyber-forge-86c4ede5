@@ -12,6 +12,7 @@ const AppShell = lazy(() => import('@/app-shells/app/AppShell'));
 const DashboardShell = lazy(() => import('@/app-shells/dashboard/DashboardShell'));
 const DocsShell = lazy(() => import('@/app-shells/docs/DocsShell'));
 const BlogShell = lazy(() => import('@/app-shells/blog/BlogShell'));
+const StatusShell = lazy(() => import('@/app-shells/status/StatusShell'));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-background">
@@ -42,6 +43,9 @@ export const AppRouter = () => {
         
         {/* Blog subdomain */}
         <Route path="/blog/*" element={<BlogShell />} />
+        
+        {/* Status subdomain */}
+        <Route path="/status/*" element={<StatusShell />} />
         
         {/* App subdomain */}
         <Route path="/app/*" element={<AppShell />} />
