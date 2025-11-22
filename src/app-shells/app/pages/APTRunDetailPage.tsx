@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Activity, Shield, AlertTriangle } from 'lucide-react';
+import { KillChainTimeline } from '@/components/apt/KillChainTimeline';
 
 export default function APTRunDetailPage() {
   const { id } = useParams();
@@ -234,31 +235,7 @@ export default function APTRunDetailPage() {
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Kill Chain Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {events.reduce((acc: any[], event) => {
-                  if (!acc.find(e => e.stage === event.stage)) {
-                    acc.push(event);
-                  }
-                  return acc;
-                }, []).map((event, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="rounded-full bg-primary h-3 w-3 mt-1" />
-                    <div>
-                      <p className="font-medium capitalize">{event.stage.replace(/_/g, ' ')}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(event.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <KillChainTimeline events={events} />
         </TabsContent>
       </Tabs>
     </div>

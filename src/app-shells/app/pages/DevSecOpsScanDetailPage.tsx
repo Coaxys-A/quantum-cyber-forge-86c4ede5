@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, CheckCircle, Info, XCircle, Download } from 'lucide-react';
+import { SBOMTreeViewer } from '@/components/devsecops/SBOMTreeViewer';
+import { exportDevSecOpsScanToPDF } from '@/lib/pdf-export';
 
 export default function DevSecOpsScanDetailPage() {
   const { id } = useParams();
@@ -73,6 +75,15 @@ export default function DevSecOpsScanDetailPage() {
   const severityCount = (severity: string) =>
     findings.filter(f => f.severity === severity).length;
 
+  const handleExportPDF = () => {
+    if (scan) {
+      exportDevSecOpsScanToPDF({
+        ...scan,
+        findings
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
@@ -106,9 +117,15 @@ export default function DevSecOpsScanDetailPage() {
             {scan.target_type}: {scan.target_identifier}
           </p>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
-          {findings.length} Findings
-        </Badge>
+        <div className="flex gap-2 items-center">
+          <Button variant="outline" onClick={handleExportPDF}>
+            <Download className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+          <Badge variant="outline" className="text-lg px-4 py-2">
+            {findings.length} Findings
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -235,31 +252,7 @@ export default function DevSecOpsScanDetailPage() {
 
         {sbom && (
           <TabsContent value="sbom" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Software Bill of Materials</CardTitle>
-                <CardDescription>
-                  {sbom.format.toUpperCase()} v{sbom.version} - {sbom.components.length}{' '}
-                  components
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {sbom.components.map((comp: any, i: number) => (
-                    <div
-                      key={i}
-                      className="flex justify-between items-center p-2 rounded-md border"
-                    >
-                      <div>
-                        <p className="font-medium">{comp.name}</p>
-                        <p className="text-sm text-muted-foreground">{comp.type}</p>
-                      </div>
-                      <Badge variant="outline">{comp.version}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <SBOMTreeViewer sbom={sbom} />
           </TabsContent>
         )}
 
