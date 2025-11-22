@@ -1,161 +1,293 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, CreditCard, Download } from 'lucide-react';
-import { apiClient } from '@/lib/api-client';
-import { PaymentModal } from '@/components/payments/PaymentModal';
-import { toast } from 'sonner';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBilling } from '@/hooks/useBilling';
+import { CryptoPaymentModal } from '@/components/billing/CryptoPaymentModal';
+import { CreditCard, Bitcoin, Download, ExternalLink, Zap, Check } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BillingPage() {
-  const [subscription, setSubscription] = useState<any>(null);
-  const [plans, setPlans] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { plans, subscription, usage, invoices, isLoading, createCheckout, createPortal } = useBilling();
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [showCryptoModal, setShowCryptoModal] = useState(false);
 
-  useEffect(() => {
-    loadBillingData();
-  }, []);
-
-  const loadBillingData = async () => {
-    try {
-      const [subData, plansData] = await Promise.all([
-        apiClient.billing.subscription(),
-        apiClient.billing.plans(),
-      ]);
-      setSubscription(subData);
-      setPlans(plansData);
-    } catch (error) {
-      toast.error('Failed to load billing data');
-    } finally {
-      setLoading(false);
+  const handleUpgrade = (plan: any, cycle: 'monthly' | 'yearly', method: 'stripe' | 'crypto') => {
+    setSelectedPlan(plan);
+    setBillingCycle(cycle);
+    
+    if (method === 'stripe') {
+      createCheckout.mutate({ planId: plan.id, billingCycle: cycle });
+    } else {
+      setShowCryptoModal(true);
     }
   };
 
-  const handleUpgrade = (plan: any) => {
-    setSelectedPlan(plan);
-    setPaymentModalOpen(true);
+  const getUsagePercentage = (type: string, limit: number | null) => {
+    if (!limit || limit === -1) return 0;
+    const used = usage?.[type] || 0;
+    return Math.min((used / limit) * 100, 100);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Billing & Subscription</h1>
+          <p className="text-muted-foreground">Manage your subscription and billing</p>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
       </div>
     );
   }
 
+  const currentPlan = subscription?.plan;
+  const isActive = subscription?.status === 'active';
+
   return (
-    <>
-      <div className="space-y-6 max-w-6xl mx-auto p-6">
-        <div>
-          <h1 className="text-3xl font-bold">Billing & Subscription</h1>
-          <p className="text-muted-foreground">Manage your subscription and billing details</p>
-        </div>
-
-        {subscription && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Current Subscription</CardTitle>
-              <CardDescription>Your active plan and billing information</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold">{subscription.plan?.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Status: <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
-                      {subscription.status}
-                    </Badge>
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold">${subscription.plan?.price_monthly}/mo</p>
-                </div>
-              </div>
-              
-              {subscription.invoices && subscription.invoices.length > 0 && (
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold mb-2">Recent Invoices</h4>
-                  <div className="space-y-2">
-                    {subscription.invoices.slice(0, 3).map((invoice: any) => (
-                      <div key={invoice.id} className="flex items-center justify-between text-sm">
-                        <span>{new Date(invoice.created_at).toLocaleDateString()}</span>
-                        <span>${invoice.amount}</span>
-                        <Badge variant="outline">{invoice.status}</Badge>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Available Plans</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((plan) => {
-              const isCurrentPlan = subscription?.plan?.id === plan.id;
-              const features = plan.features || [];
-              
-              return (
-                <Card key={plan.id} className={isCurrentPlan ? 'border-primary' : ''}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      {plan.name}
-                      {isCurrentPlan && <Badge>Current</Badge>}
-                    </CardTitle>
-                    <CardDescription>
-                      <span className="text-3xl font-bold">${plan.price_monthly}</span>
-                      <span className="text-muted-foreground">/month</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {features.map((feature: string, index: number) => (
-                        <li key={index} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button 
-                      onClick={() => handleUpgrade(plan)}
-                      className="w-full"
-                      disabled={isCurrentPlan}
-                      variant={isCurrentPlan ? 'outline' : 'default'}
-                    >
-                      {isCurrentPlan ? (
-                        <>
-                          <CreditCard className="mr-2 h-4 w-4" />
-                          Current Plan
-                        </>
-                      ) : (
-                        'Upgrade Now'
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Billing & Subscription</h1>
+        <p className="text-muted-foreground">Manage your subscription and billing</p>
       </div>
 
-      {selectedPlan && (
-        <PaymentModal
-          open={paymentModalOpen}
-          onClose={() => setPaymentModalOpen(false)}
+      {/* Current Subscription */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Current Plan</CardTitle>
+            <CardDescription>Your active subscription</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {currentPlan ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold">{currentPlan.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      ${subscription.billing_cycle === 'yearly' ? currentPlan.price_yearly : currentPlan.price_monthly}
+                      /{subscription.billing_cycle === 'yearly' ? 'year' : 'month'}
+                    </p>
+                  </div>
+                  <Badge variant={isActive ? 'default' : 'secondary'}>
+                    {subscription.status}
+                  </Badge>
+                </div>
+
+                {subscription.current_period_end && (
+                  <div className="text-sm text-muted-foreground">
+                    Renews on {new Date(subscription.current_period_end).toLocaleDateString()}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => createPortal.mutate()}
+                    disabled={createPortal.isPending}
+                    className="flex-1"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Manage Billing
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">No active subscription</p>
+                <Button onClick={() => document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth' })}>
+                  Choose a Plan
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Usage Statistics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Usage Statistics</CardTitle>
+            <CardDescription>Current month usage</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {currentPlan && (
+              <>
+                {currentPlan.limits.max_ai_requests && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>AI Requests</span>
+                      <span className="text-muted-foreground">
+                        {usage?.AI_REQUEST || 0} / {currentPlan.limits.max_ai_requests === -1 ? '∞' : currentPlan.limits.max_ai_requests}
+                      </span>
+                    </div>
+                    <Progress value={getUsagePercentage('AI_REQUEST', currentPlan.limits.max_ai_requests)} />
+                  </div>
+                )}
+
+                {currentPlan.limits.max_simulations && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Simulations</span>
+                      <span className="text-muted-foreground">
+                        {usage?.SIMULATION || 0} / {currentPlan.limits.max_simulations === -1 ? '∞' : currentPlan.limits.max_simulations}
+                      </span>
+                    </div>
+                    <Progress value={getUsagePercentage('SIMULATION', currentPlan.limits.max_simulations)} />
+                  </div>
+                )}
+
+                {currentPlan.limits.max_projects && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Projects</span>
+                      <span className="text-muted-foreground">
+                        {usage?.PROJECT || 0} / {currentPlan.limits.max_projects === -1 ? '∞' : currentPlan.limits.max_projects}
+                      </span>
+                    </div>
+                    <Progress value={getUsagePercentage('PROJECT', currentPlan.limits.max_projects)} />
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Available Plans */}
+      <div id="plans">
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Plans</CardTitle>
+            <CardDescription>Choose the plan that fits your needs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={billingCycle} onValueChange={(v: any) => setBillingCycle(v)} className="mb-6">
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+                <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                <TabsTrigger value="yearly">
+                  Yearly
+                  <Badge variant="secondary" className="ml-2">Save 20%</Badge>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {plans?.map((plan) => {
+                const price = billingCycle === 'yearly' ? plan.price_yearly : plan.price_monthly;
+                const usdtPrice = billingCycle === 'yearly' ? plan.usdt_price_yearly : plan.usdt_price_monthly;
+                const isCurrent = currentPlan?.id === plan.id;
+
+                return (
+                  <Card key={plan.id} className={isCurrent ? 'border-primary' : ''}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle>{plan.name}</CardTitle>
+                        {isCurrent && <Badge>Current</Badge>}
+                      </div>
+                      <div className="text-3xl font-bold">
+                        ${price}
+                        <span className="text-base font-normal text-muted-foreground">
+                          /{billingCycle === 'yearly' ? 'year' : 'month'}
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-2">
+                        {(plan.features as string[])?.map((feature, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {!isCurrent && (
+                        <div className="space-y-2">
+                          <Button
+                            onClick={() => handleUpgrade(plan, billingCycle, 'stripe')}
+                            disabled={createCheckout.isPending}
+                            className="w-full"
+                          >
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Subscribe with Card
+                          </Button>
+                          
+                          {usdtPrice && (
+                            <Button
+                              onClick={() => handleUpgrade(plan, billingCycle, 'crypto')}
+                              variant="outline"
+                              className="w-full"
+                            >
+                              <Bitcoin className="h-4 w-4 mr-2" />
+                              Pay with USDT
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Invoices */}
+      {invoices && invoices.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Invoices</CardTitle>
+            <CardDescription>Your billing history</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {invoices.map((invoice: any) => (
+                <div
+                  key={invoice.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="font-medium">
+                        ${(invoice.amount / 100).toFixed(2)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(invoice.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant={invoice.status === 'paid' ? 'default' : 'secondary'}>
+                    {invoice.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Crypto Payment Modal */}
+      {selectedPlan && showCryptoModal && (
+        <CryptoPaymentModal
+          open={showCryptoModal}
+          onClose={() => {
+            setShowCryptoModal(false);
+            setSelectedPlan(null);
+          }}
           planId={selectedPlan.id}
           planName={selectedPlan.name}
-          price={selectedPlan.price_monthly}
+          priceMonthly={selectedPlan.price_monthly}
+          priceYearly={selectedPlan.price_yearly}
+          usdtPriceMonthly={selectedPlan.usdt_price_monthly}
+          usdtPriceYearly={selectedPlan.usdt_price_yearly}
         />
       )}
-    </>
+    </div>
   );
 }
