@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { billingClient } from '@/lib/billing-client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface PlanLimits {
   max_projects: number;
@@ -11,24 +11,68 @@ export interface PlanLimits {
   max_team_members: number;
 }
 
+export interface UsageStats {
+  PROJECTS?: number;
+  ARCHITECTURE_NODES?: number;
+  RISKS?: number;
+  SIMULATIONS?: number;
+  AI_REQUESTS?: number;
+  TEAM_MEMBERS?: number;
+}
+
 export function usePlanLimits() {
+  const { profile, isHypervisor, planTier } = useAuth();
+
   const { data: subscription } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: () => billingClient.getCurrentSubscription()
+    queryKey: ['subscription', profile?.tenant_id],
+    queryFn: async () => {
+      if (!profile?.tenant_id) return null;
+      
+      const { data } = await supabase
+        .from('subscriptions')
+        .select(`
+          *,
+          plan:plans(*)
+        `)
+        .eq('tenant_id', profile.tenant_id)
+        .eq('status', 'active')
+        .maybeSingle();
+      
+      return data;
+    },
+    enabled: !!profile?.tenant_id && !isHypervisor
   });
 
   const { data: usage } = useQuery({
-    queryKey: ['usage'],
-    queryFn: () => billingClient.getUsageStats()
+    queryKey: ['usage', profile?.tenant_id],
+    queryFn: async () => {
+      if (!profile?.tenant_id) return {};
+
+      const { data } = await supabase
+        .from('usage_events')
+        .select('type')
+        .eq('tenant_id', profile.tenant_id);
+
+      if (!data) return {};
+
+      // Aggregate usage by type
+      const stats: UsageStats = {};
+      data.forEach(event => {
+        const key = event.type as keyof UsageStats;
+        stats[key] = (stats[key] || 0) + 1;
+      });
+
+      return stats;
+    },
+    enabled: !!profile?.tenant_id
   });
 
-  const limits = subscription?.plan?.limits as PlanLimits | undefined;
-  const isHypervisor = subscription?.plan?.tier === 'ENTERPRISE_PLUS';
+  const limits = subscription?.plan?.limits as unknown as PlanLimits | undefined;
 
   const checkLimit = (resource: string): { allowed: boolean; used: number; limit: number } => {
     // Hypervisor has unlimited everything
     if (isHypervisor) {
-      return { allowed: true, used: usage?.[resource] || 0, limit: -1 };
+      return { allowed: true, used: usage?.[resource as keyof UsageStats] || 0, limit: -1 };
     }
 
     if (!limits) {
@@ -37,7 +81,7 @@ export function usePlanLimits() {
 
     const limitKey = `max_${resource.toLowerCase()}` as keyof PlanLimits;
     const limit = limits[limitKey];
-    const used = usage?.[resource.toUpperCase()] || 0;
+    const used = usage?.[resource.toUpperCase() as keyof UsageStats] || 0;
 
     // -1 means unlimited
     if (limit === -1) {
@@ -66,6 +110,7 @@ export function usePlanLimits() {
     subscription,
     usage,
     isHypervisor,
+    planTier,
     checkLimit,
     canCreate,
     getUsagePercentage

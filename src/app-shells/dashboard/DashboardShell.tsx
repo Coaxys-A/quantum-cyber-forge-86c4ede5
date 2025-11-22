@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { RouteGuard } from '@/components/RouteGuard';
 import DashboardLayout from './DashboardLayout';
 import OverviewPage from './pages/OverviewPage';
 import TenantsPage from './pages/TenantsPage';
@@ -11,27 +11,9 @@ import LogsPage from './pages/LogsPage';
 import SEODashboardPage from './pages/SEODashboardPage';
 import InfrastructurePage from './pages/InfrastructurePage';
 
-const PlatformRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, hasRole } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!user || (!hasRole('PLATFORM_ADMIN') && !hasRole('HYPERVISOR'))) {
-    return <Navigate to="/app/login" replace />;
-  }
-
-  return <>{children}</>;
-};
-
 export default function DashboardShell() {
   return (
-    <PlatformRoute>
+    <RouteGuard requireAuth requireRole="HYPERVISOR">
       <DashboardLayout>
         <Routes>
           <Route path="/overview" element={<OverviewPage />} />
@@ -47,6 +29,6 @@ export default function DashboardShell() {
           <Route path="*" element={<Navigate to="/dashboard/overview" replace />} />
         </Routes>
       </DashboardLayout>
-    </PlatformRoute>
+    </RouteGuard>
   );
 }

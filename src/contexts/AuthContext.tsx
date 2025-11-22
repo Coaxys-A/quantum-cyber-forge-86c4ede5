@@ -19,11 +19,24 @@ interface UserRole {
   tenant_id?: string;
 }
 
+interface Subscription {
+  id: string;
+  tenant_id: string;
+  plan_id: string;
+  status: string;
+  plan?: {
+    tier: string;
+    name: string;
+  };
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   roles: UserRole[];
+  subscription: Subscription | null;
+  planTier: string | null;
   loading: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -31,22 +44,30 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   hasRole: (role: string) => boolean;
+  isHypervisor: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const HYPERVISOR_EMAIL = 'arsam12sb@gmail.com';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  const isHypervisor = user?.email === HYPERVISOR_EMAIL || roles.some(r => r.role === 'HYPERVISOR');
+  const planTier = isHypervisor ? 'ENTERPRISE_PLUS' : (subscription?.plan?.tier || null);
 
   const refreshProfile = async () => {
     if (!user) {
       setProfile(null);
       setRoles([]);
+      setSubscription(null);
       return;
     }
 
@@ -73,8 +94,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (rolesError) throw rolesError;
 
       setRoles(rolesData || []);
+
+      // Fetch subscription if profile has tenant_id
+      if (profileData?.tenant_id) {
+        const { data: subData } = await supabase
+          .from('subscriptions')
+          .select(`
+            *,
+            plan:plans(tier, name)
+          `)
+          .eq('tenant_id', profileData.tenant_id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        setSubscription(subData);
+      }
+
+      // Debug info for hypervisor
+      if (user.email === HYPERVISOR_EMAIL) {
+        console.log('[AUTH DEBUG] Hypervisor detected:', {
+          email: user.email,
+          roles: rolesData?.map(r => r.role),
+          planTier: 'ENTERPRISE_PLUS (override)',
+          tenantId: profileData?.tenant_id
+        });
+      }
     } catch (error: any) {
-      // Don't log sensitive profile data
       toast({
         title: 'Error loading profile',
         description: 'Unable to load profile data. Please refresh the page.',
@@ -98,6 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setProfile(null);
           setRoles([]);
+          setSubscription(null);
         }
       }
     );
@@ -134,7 +180,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        // Sanitized error message - don't expose internal details
         const userMessage = error.message.includes('already registered')
           ? 'This email is already registered. Please sign in instead.'
           : 'Unable to create account. Please check your information and try again.';
@@ -170,7 +215,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        // Sanitized error message - don't expose internal details
         const userMessage = 'Invalid email or password. Please try again.';
         
         toast({
@@ -232,8 +276,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setProfile(null);
       setRoles([]);
+      setSubscription(null);
     } catch (error: any) {
-      // Don't expose internal error details
       toast({
         title: 'Sign out failed',
         description: 'Unable to sign out. Please try again.',
@@ -243,9 +287,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const hasRole = (role: string): boolean => {
-    // Support both HYPERVISOR and other roles
     if (role === 'HYPERVISOR') {
-      return roles.some(r => r.role === 'HYPERVISOR');
+      return isHypervisor;
     }
     return roles.some(r => r.role === role);
   };
@@ -256,13 +299,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       profile,
       roles,
+      subscription,
+      planTier,
       loading,
       signUp,
       signIn,
       signInWithGoogle,
       signOut,
       refreshProfile,
-      hasRole
+      hasRole,
+      isHypervisor
     }}>
       {children}
     </AuthContext.Provider>

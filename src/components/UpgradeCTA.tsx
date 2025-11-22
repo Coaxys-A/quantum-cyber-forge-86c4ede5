@@ -2,16 +2,23 @@ import { Lock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { isDemoMode } from '@/lib/demo-tenant';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
 
 interface UpgradeCTAProps {
   feature: string;
   description?: string;
   inline?: boolean;
+  resource?: string;
 }
 
-export function UpgradeCTA({ feature, description, inline = false }: UpgradeCTAProps) {
-  if (!isDemoMode()) return null;
+export function UpgradeCTA({ feature, description, inline = false, resource }: UpgradeCTAProps) {
+  const { isHypervisor, canCreate } = usePlanLimits();
+  
+  // Don't show for hypervisor
+  if (isHypervisor) return null;
+  
+  // If resource specified, check if limit is reached
+  if (resource && canCreate(resource)) return null;
 
   if (inline) {
     return (
