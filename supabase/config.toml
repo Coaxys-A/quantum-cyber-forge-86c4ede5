@@ -1,1 +1,7 @@
 project_id = "hsbgnmbnbpyxtetnxxbd"
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.crypto-payment]
+verify_jwt = true
