@@ -180,6 +180,30 @@ export async function seedDemoTenant() {
     await supabase.from('findings').upsert(findings, { onConflict: 'tenant_id,title' });
     console.log(`[DEMO SEEDER] Created ${findings.length} findings`);
 
+    // Seed APT scenarios
+    await supabase.from('apt_scenarios').upsert([
+      {
+        tenant_id: DEMO_TENANT_ID,
+        name: 'APT28 Phishing Campaign',
+        description: 'Credential harvesting via spear-phishing',
+        actor_profile_id: '11111111-1111-1111-1111-111111111111',
+        attack_vector: 'phishing',
+        objectives: ['credential_theft', 'persistence'],
+        stealth_mode: true,
+        config: { stealth_mode: true }
+      },
+      {
+        tenant_id: DEMO_TENANT_ID,
+        name: 'REvil Ransomware Simulation',
+        description: 'Supply chain ransomware attack',
+        actor_profile_id: '55555555-5555-5555-5555-555555555555',
+        attack_vector: 'supply_chain',
+        objectives: ['encryption', 'exfiltration'],
+        stealth_mode: false,
+        config: { stealth_mode: false }
+      }
+    ], { onConflict: 'tenant_id,name' });
+
     console.log('[DEMO SEEDER] Demo tenant population complete!');
     return { success: true };
   } catch (error) {

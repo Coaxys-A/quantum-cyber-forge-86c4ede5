@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.crypto-payment]
 verify_jwt = true
+
+[functions.apt-run]
+verify_jwt = true
+
+[functions.devsecops-scan]
+verify_jwt = true
