@@ -18,12 +18,14 @@ import RiskDetailPage from './pages/RiskDetailPage';
 import RiskCreatePage from './pages/RiskCreatePage';
 import ControlsPage from './pages/ControlsPage';
 import FindingsPage from './pages/FindingsPage';
-import SimulationsPage from './pages/SimulationsPage';
-import SimulationDetailPage from './pages/SimulationDetailPage';
-import SimulationCreatePage from './pages/SimulationCreatePage';
+import SimulationsPage from './pages/APTSimulationsPage';
+import SimulationDetailPage from './pages/APTRunDetailPage';
+import SimulationCreatePage from './pages/APTScenarioBuilderPage';
 import ArchitecturePage from './pages/ArchitecturePage';
 import CompliancePage from './pages/CompliancePage';
 import DevSecOpsPage from './pages/DevSecOpsPage';
+import DevSecOpsNewScanPage from './pages/DevSecOpsNewScanPage';
+import DevSecOpsScanDetailPage from './pages/DevSecOpsScanDetailPage';
 import BillingPage from './pages/BillingPage';
 import TeamPage from './pages/TeamPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -83,9 +85,12 @@ export default function AppShell() {
                 <Route path="/security/findings" element={<FindingsPage />} />
                 
                 {/* Simulations */}
-                <Route path="/simulations" element={<SimulationsPage />} />
-                <Route path="/simulations/create" element={<SimulationCreatePage />} />
-                <Route path="/simulations/:id" element={<SimulationDetailPage />} />
+            <Route path="/simulations" element={<SimulationsPage />} />
+            <Route path="/simulations/create" element={<SimulationCreatePage />} />
+            <Route path="/simulations/:id" element={<SimulationDetailPage />} />
+            <Route path="/devsecops" element={<DevSecOpsPage />} />
+            <Route path="/devsecops/new" element={<DevSecOpsNewScanPage />} />
+            <Route path="/devsecops/:id" element={<DevSecOpsScanDetailPage />} />
                 
                 {/* Architecture */}
                 <Route path="/architecture" element={<ArchitecturePage />} />

@@ -103,6 +103,269 @@ export type Database = {
         }
         Relationships: []
       }
+      apt_actor_profiles: {
+        Row: {
+          aliases: string[] | null
+          common_ttps: Json | null
+          created_at: string | null
+          id: string
+          motivation: string | null
+          name: string
+          origin_country: string | null
+          primary_targets: string[] | null
+          sophistication_level: string
+        }
+        Insert: {
+          aliases?: string[] | null
+          common_ttps?: Json | null
+          created_at?: string | null
+          id?: string
+          motivation?: string | null
+          name: string
+          origin_country?: string | null
+          primary_targets?: string[] | null
+          sophistication_level: string
+        }
+        Update: {
+          aliases?: string[] | null
+          common_ttps?: Json | null
+          created_at?: string | null
+          id?: string
+          motivation?: string | null
+          name?: string
+          origin_country?: string | null
+          primary_targets?: string[] | null
+          sophistication_level?: string
+        }
+        Relationships: []
+      }
+      apt_detection_logs: {
+        Row: {
+          alert_severity: string
+          blocked: boolean | null
+          blue_team_response: string | null
+          confidence_score: number | null
+          created_at: string | null
+          detected_at: string | null
+          detection_type: string
+          event_id: string | null
+          id: string
+          metadata: Json | null
+          run_id: string
+        }
+        Insert: {
+          alert_severity: string
+          blocked?: boolean | null
+          blue_team_response?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          detected_at?: string | null
+          detection_type: string
+          event_id?: string | null
+          id?: string
+          metadata?: Json | null
+          run_id: string
+        }
+        Update: {
+          alert_severity?: string
+          blocked?: boolean | null
+          blue_team_response?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          detected_at?: string | null
+          detection_type?: string
+          event_id?: string | null
+          id?: string
+          metadata?: Json | null
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apt_detection_logs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "apt_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apt_detection_logs_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "apt_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apt_events: {
+        Row: {
+          created_at: string | null
+          detection_probability: number | null
+          id: string
+          impact_score: number | null
+          metadata: Json | null
+          narrative: string | null
+          run_id: string
+          stage: string
+          success: boolean
+          tactic: string
+          technique: string
+          timestamp: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          detection_probability?: number | null
+          id?: string
+          impact_score?: number | null
+          metadata?: Json | null
+          narrative?: string | null
+          run_id: string
+          stage: string
+          success: boolean
+          tactic: string
+          technique: string
+          timestamp?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          detection_probability?: number | null
+          id?: string
+          impact_score?: number | null
+          metadata?: Json | null
+          narrative?: string | null
+          run_id?: string
+          stage?: string
+          success?: boolean
+          tactic?: string
+          technique?: string
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apt_events_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "apt_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apt_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          current_stage: string | null
+          id: string
+          progress_percent: number | null
+          results: Json | null
+          scenario_id: string | null
+          started_at: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_stage?: string | null
+          id?: string
+          progress_percent?: number | null
+          results?: Json | null
+          scenario_id?: string | null
+          started_at?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_stage?: string | null
+          id?: string
+          progress_percent?: number | null
+          results?: Json | null
+          scenario_id?: string | null
+          started_at?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apt_runs_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "apt_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apt_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apt_scenarios: {
+        Row: {
+          actor_profile_id: string | null
+          attack_vector: string
+          config: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          objectives: string[] | null
+          stealth_mode: boolean | null
+          target_components: string[] | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          actor_profile_id?: string | null
+          attack_vector: string
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          objectives?: string[] | null
+          stealth_mode?: boolean | null
+          target_components?: string[] | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          actor_profile_id?: string | null
+          attack_vector?: string
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          objectives?: string[] | null
+          stealth_mode?: boolean | null
+          target_components?: string[] | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apt_scenarios_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "apt_actor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apt_scenarios_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -558,6 +821,280 @@ export type Database = {
           version?: string | null
         }
         Relationships: []
+      }
+      devsecops_findings: {
+        Row: {
+          code_snippet: string | null
+          created_at: string | null
+          cvss_score: number | null
+          cwe_id: string | null
+          description: string | null
+          exploit_available: boolean | null
+          file_path: string | null
+          finding_type: string
+          id: string
+          line_number: number | null
+          metadata: Json | null
+          remediation: string | null
+          resolved_at: string | null
+          scan_id: string
+          severity: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          code_snippet?: string | null
+          created_at?: string | null
+          cvss_score?: number | null
+          cwe_id?: string | null
+          description?: string | null
+          exploit_available?: boolean | null
+          file_path?: string | null
+          finding_type: string
+          id?: string
+          line_number?: number | null
+          metadata?: Json | null
+          remediation?: string | null
+          resolved_at?: string | null
+          scan_id: string
+          severity: string
+          status?: string | null
+          title: string
+        }
+        Update: {
+          code_snippet?: string | null
+          created_at?: string | null
+          cvss_score?: number | null
+          cwe_id?: string | null
+          description?: string | null
+          exploit_available?: boolean | null
+          file_path?: string | null
+          finding_type?: string
+          id?: string
+          line_number?: number | null
+          metadata?: Json | null
+          remediation?: string | null
+          resolved_at?: string | null
+          scan_id?: string
+          severity?: string
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devsecops_findings_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "devsecops_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devsecops_pipeline_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          findings_summary: Json | null
+          id: string
+          logs: string | null
+          pipeline_id: string
+          scan_ids: string[] | null
+          started_at: string | null
+          status: string
+          trigger_metadata: Json | null
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          findings_summary?: Json | null
+          id?: string
+          logs?: string | null
+          pipeline_id: string
+          scan_ids?: string[] | null
+          started_at?: string | null
+          status?: string
+          trigger_metadata?: Json | null
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          findings_summary?: Json | null
+          id?: string
+          logs?: string | null
+          pipeline_id?: string
+          scan_ids?: string[] | null
+          started_at?: string | null
+          status?: string
+          trigger_metadata?: Json | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devsecops_pipeline_runs_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "devsecops_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devsecops_pipelines: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          enabled: boolean | null
+          failure_threshold: Json | null
+          id: string
+          last_run_id: string | null
+          name: string
+          pipeline_yaml: string
+          tenant_id: string
+          triggers: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          failure_threshold?: Json | null
+          id?: string
+          last_run_id?: string | null
+          name: string
+          pipeline_yaml: string
+          tenant_id: string
+          triggers?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          failure_threshold?: Json | null
+          id?: string
+          last_run_id?: string | null
+          name?: string
+          pipeline_yaml?: string
+          tenant_id?: string
+          triggers?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devsecops_pipelines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devsecops_sbom: {
+        Row: {
+          components: Json
+          created_at: string | null
+          dependencies: Json | null
+          format: string
+          id: string
+          metadata: Json | null
+          scan_id: string
+          version: string
+          vulnerabilities: Json | null
+        }
+        Insert: {
+          components?: Json
+          created_at?: string | null
+          dependencies?: Json | null
+          format: string
+          id?: string
+          metadata?: Json | null
+          scan_id: string
+          version: string
+          vulnerabilities?: Json | null
+        }
+        Update: {
+          components?: Json
+          created_at?: string | null
+          dependencies?: Json | null
+          format?: string
+          id?: string
+          metadata?: Json | null
+          scan_id?: string
+          version?: string
+          vulnerabilities?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devsecops_sbom_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "devsecops_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devsecops_scans: {
+        Row: {
+          completed_at: string | null
+          config: Json | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          progress_percent: number | null
+          scan_types: string[]
+          started_at: string | null
+          status: string
+          target_identifier: string
+          target_type: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+          progress_percent?: number | null
+          scan_types: string[]
+          started_at?: string | null
+          status?: string
+          target_identifier: string
+          target_type: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          progress_percent?: number | null
+          scan_types?: string[]
+          started_at?: string | null
+          status?: string
+          target_identifier?: string
+          target_type?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devsecops_scans_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       doc_pages: {
         Row: {
