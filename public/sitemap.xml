@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://hyperionflux.com/sitemap-app.xml</loc>
+    <lastmod>2024-01-20T00:00:00+00:00</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hyperionflux.com/sitemap-docs.xml</loc>
+    <lastmod>2024-01-20T00:00:00+00:00</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hyperionflux.com/sitemap-blog.xml</loc>
+    <lastmod>2024-01-20T00:00:00+00:00</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hyperionflux.com/sitemap-status.xml</loc>
+    <lastmod>2024-01-20T00:00:00+00:00</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://hyperionflux.com/sitemap-marketing.xml</loc>
+    <lastmod>2024-01-20T00:00:00+00:00</lastmod>
+  </sitemap>
+</sitemapindex>

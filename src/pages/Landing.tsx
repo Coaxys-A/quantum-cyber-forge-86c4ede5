@@ -5,8 +5,23 @@ import { Shield, Zap, Globe, Lock, BarChart3, Users, ArrowRight, Check } from 'l
 import { Footer } from '@/components/Footer';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { SEOHead } from '@/components/SEOHead';
 
 export default function Landing() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Hyperion-Flux',
+    applicationCategory: 'SecurityApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    description: 'Advanced cyber operations platform with APT simulation, compliance automation, and DevSecOps integration',
+  };
+
   const features = [
     {
       icon: Shield,
@@ -51,6 +66,13 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Hyperion-Flux - Advanced Cyber Operations Platform"
+        description="Enterprise security operations platform with APT simulation, compliance automation, architecture visualization, and AI-powered analysis for modern security teams."
+        keywords="cyber security, APT simulation, compliance automation, DevSecOps, SBOM, MITRE ATT&CK, security operations center"
+        jsonLd={jsonLd}
+      />
+      
       {/* Header */}
       <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">

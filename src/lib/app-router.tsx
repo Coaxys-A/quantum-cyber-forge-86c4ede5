@@ -1,11 +1,18 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Landing from '@/pages/Landing';
 import Pricing from '@/pages/Pricing';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
+
+// Lazy load marketing pages
+const Features = lazy(() => import('@/pages/Features'));
+const Solutions = lazy(() => import('@/pages/Solutions'));
+const Compare = lazy(() => import('@/pages/Compare'));
+const Industries = lazy(() => import('@/pages/Industries'));
 
 // Lazy load subdomain shells
 const AppShell = lazy(() => import('@/app-shells/app/AppShell'));
@@ -25,8 +32,9 @@ const LoadingFallback = () => (
 
 export const AppRouter = () => {
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
         {/* Public routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/pricing" element={<Pricing />} />
@@ -34,6 +42,10 @@ export const AppRouter = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/solutions" element={<Solutions />} />
+        <Route path="/compare/:competitor" element={<Compare />} />
+        <Route path="/industries/:industry" element={<Industries />} />
         
         {/* Dashboard subdomain */}
         <Route path="/dashboard/*" element={<DashboardShell />} />
@@ -52,7 +64,8 @@ export const AppRouter = () => {
         
         {/* Catch all - redirect to landing */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 };
