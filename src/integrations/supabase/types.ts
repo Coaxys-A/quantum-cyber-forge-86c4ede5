@@ -61,6 +61,33 @@ export type Database = {
           },
         ]
       }
+      billing_webhook_events: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json | null
+          processed_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -256,6 +283,75 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "controls_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crypto_payments: {
+        Row: {
+          address: string
+          amount_token: number
+          amount_usd: number
+          billing_cycle: string
+          confirmed_at: string | null
+          created_at: string | null
+          currency: string
+          expires_at: string
+          id: string
+          network: string
+          plan_id: string
+          status: string
+          tenant_id: string
+          tx_hash: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          amount_token: number
+          amount_usd: number
+          billing_cycle: string
+          confirmed_at?: string | null
+          created_at?: string | null
+          currency?: string
+          expires_at: string
+          id?: string
+          network: string
+          plan_id: string
+          status?: string
+          tenant_id: string
+          tx_hash?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          amount_token?: number
+          amount_usd?: number
+          billing_cycle?: string
+          confirmed_at?: string | null
+          created_at?: string | null
+          currency?: string
+          expires_at?: string
+          id?: string
+          network?: string
+          plan_id?: string
+          status?: string
+          tenant_id?: string
+          tx_hash?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crypto_payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crypto_payments_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -766,6 +862,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          billing_cycle: string | null
           billing_owner_id: string | null
           cancel_at: string | null
           created_at: string | null
@@ -779,6 +876,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          billing_cycle?: string | null
           billing_owner_id?: string | null
           cancel_at?: string | null
           created_at?: string | null
@@ -792,6 +890,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          billing_cycle?: string | null
           billing_owner_id?: string | null
           cancel_at?: string | null
           created_at?: string | null
@@ -888,6 +987,7 @@ export type Database = {
           id: string
           name: string
           settings: Json | null
+          stripe_customer_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -896,6 +996,7 @@ export type Database = {
           id?: string
           name: string
           settings?: Json | null
+          stripe_customer_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -904,9 +1005,45 @@ export type Database = {
           id?: string
           name?: string
           settings?: Json | null
+          stripe_customer_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
+      }
+      usage_events: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          quantity: number
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          quantity?: number
+          tenant_id: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          quantity?: number
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
