@@ -8,6 +8,8 @@ import UsersPage from './pages/UsersPage';
 import PlansPage from './pages/PlansPage';
 import SystemHealthPage from './pages/SystemHealthPage';
 import LogsPage from './pages/LogsPage';
+import SEODashboardPage from './pages/SEODashboardPage';
+import InfrastructurePage from './pages/InfrastructurePage';
 
 const PlatformRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, hasRole } = useAuth();
@@ -39,6 +41,8 @@ export default function DashboardShell() {
           <Route path="/plans" element={<PlansPage />} />
           <Route path="/system/health" element={<SystemHealthPage />} />
           <Route path="/system/logs" element={<LogsPage />} />
+          <Route path="/seo" element={<SEODashboardPage />} />
+          <Route path="/infrastructure" element={<InfrastructurePage />} />
           <Route path="/" element={<Navigate to="/dashboard/overview" replace />} />
           <Route path="*" element={<Navigate to="/dashboard/overview" replace />} />
         </Routes>
