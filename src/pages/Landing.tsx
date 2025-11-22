@@ -50,7 +50,7 @@ export default function Landing() {
       <SEOHead title="Hyperion-Flux - Advanced Cyber Operations Platform" description="Enterprise security operations platform with APT simulation, compliance automation, architecture visualization, and AI-powered analysis for modern security teams." keywords="cyber security, APT simulation, compliance automation, DevSecOps, SBOM, MITRE ATT&CK, security operations center" jsonLd={jsonLd} />
       
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <header className="border-b border-border/10 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Shield className="h-8 w-8 text-primary animate-pulse" />
