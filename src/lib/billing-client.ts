@@ -129,33 +129,22 @@ export const billingClient = {
 
   // Create crypto payment
   async createCryptoPayment(request: CryptoPaymentRequest): Promise<CryptoPayment> {
-    const response = await fetch('/api/billing/crypto/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-      },
-      body: JSON.stringify(request)
+    const { data, error } = await supabase.functions.invoke('crypto-payment', {
+      body: { action: 'create', ...request }
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create crypto payment');
-    }
-
-    return response.json();
+    if (error) throw error;
+    return data;
   },
 
   // Check crypto payment status
   async checkCryptoPayment(paymentId: string): Promise<CryptoPayment> {
-    const { data, error } = await supabase
-      .from('crypto_payments')
-      .select('*')
-      .eq('id', paymentId)
-      .single();
+    const { data, error } = await supabase.functions.invoke('crypto-payment', {
+      body: { action: 'check', payment_id: paymentId }
+    });
 
     if (error) throw error;
-    return data as CryptoPayment;
+    return data;
   },
 
   // Get usage statistics
