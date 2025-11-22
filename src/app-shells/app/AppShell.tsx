@@ -5,6 +5,8 @@ import AppLayout from './AppLayout';
 // Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import OnboardingPage from './pages/OnboardingPage';
 import DashboardPage from './pages/DashboardPage';
 import ModulesPage from './pages/ModulesPage';
@@ -50,6 +52,8 @@ export default function AppShell() {
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       
       {/* Protected routes */}
       <Route
