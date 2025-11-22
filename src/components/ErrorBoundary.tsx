@@ -23,23 +23,27 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Only log error message, not sensitive data or stack traces
+    console.error('ErrorBoundary caught an error:', error.message);
     
-    // Log to audit system if available
+    // Store minimal error info for debugging (no stack traces in localStorage)
     try {
+      const errorId = `err_${Date.now()}`;
       const auditEvent = {
+        errorId,
         action: 'ERROR',
         resourceType: 'UI',
-        details: {
-          error: error.message,
-          stack: error.stack,
-          componentStack: errorInfo.componentStack,
-        },
+        message: error.message,
         timestamp: new Date().toISOString(),
       };
-      localStorage.setItem('last_error', JSON.stringify(auditEvent));
+      
+      // Only store error ID, send full details to backend if available
+      localStorage.setItem('last_error_id', errorId);
+      
+      // TODO: Send full error details to backend audit log
+      // await auditLogger.logError(auditEvent);
     } catch (e) {
-      console.error('Failed to log error:', e);
+      // Silently fail if can't log
     }
   }
 

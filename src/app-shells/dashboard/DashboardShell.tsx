@@ -10,7 +10,7 @@ import SystemHealthPage from './pages/SystemHealthPage';
 import LogsPage from './pages/LogsPage';
 
 const PlatformRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, hasRole } = useAuth();
 
   if (loading) {
     return (
@@ -20,7 +20,7 @@ const PlatformRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user || user.role !== 'PLATFORM_ADMIN') {
+  if (!user || (!hasRole('PLATFORM_ADMIN') && !hasRole('HYPERVISOR'))) {
     return <Navigate to="/app/login" replace />;
   }
 
