@@ -22,6 +22,8 @@ import SimulationsPage from './pages/SimulationsPage';
 import SimulationDetailPage from './pages/SimulationDetailPage';
 import SimulationCreatePage from './pages/SimulationCreatePage';
 import ArchitecturePage from './pages/ArchitecturePage';
+import CompliancePage from './pages/CompliancePage';
+import DevSecOpsPage from './pages/DevSecOpsPage';
 import BillingPage from './pages/BillingPage';
 import TeamPage from './pages/TeamPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -87,6 +89,12 @@ export default function AppShell() {
                 
                 {/* Architecture */}
                 <Route path="/architecture" element={<ArchitecturePage />} />
+                
+                {/* Compliance */}
+                <Route path="/compliance" element={<CompliancePage />} />
+                
+                {/* DevSecOps */}
+                <Route path="/devsecops" element={<DevSecOpsPage />} />
                 
                 {/* Billing */}
                 <Route path="/billing" element={<BillingPage />} />
