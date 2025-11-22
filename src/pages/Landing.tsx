@@ -6,7 +6,6 @@ import { Footer } from '@/components/Footer';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { SEOHead } from '@/components/SEOHead';
-
 export default function Landing() {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -17,61 +16,38 @@ export default function Landing() {
     offers: {
       '@type': 'Offer',
       price: '0',
-      priceCurrency: 'USD',
+      priceCurrency: 'USD'
     },
-    description: 'Advanced cyber operations platform with APT simulation, compliance automation, and DevSecOps integration',
+    description: 'Advanced cyber operations platform with APT simulation, compliance automation, and DevSecOps integration'
   };
-
-  const features = [
-    {
-      icon: Shield,
-      title: 'Advanced Security',
-      description: 'Enterprise-grade security with real-time threat detection and risk management'
-    },
-    {
-      icon: Zap,
-      title: 'Cyber Simulations',
-      description: 'Run realistic security scenarios to test and improve your defenses'
-    },
-    {
-      icon: Globe,
-      title: 'Global Operations',
-      description: 'Manage distributed teams across 25+ languages with RTL support'
-    },
-    {
-      icon: Lock,
-      title: 'Compliance Ready',
-      description: 'SOC 2, ISO 27001, and GDPR compliance built-in from day one'
-    },
-    {
-      icon: BarChart3,
-      title: 'Real-time Analytics',
-      description: 'Comprehensive dashboards and metrics for informed decision making'
-    },
-    {
-      icon: Users,
-      title: 'Team Collaboration',
-      description: 'Role-based access control and seamless team coordination'
-    }
-  ];
-
-  const highlights = [
-    'Multi-tenant architecture',
-    'Advanced RBAC',
-    '99.9% uptime SLA',
-    'Dedicated support',
-    'Custom integrations',
-    'White-label options'
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
-      <SEOHead
-        title="Hyperion-Flux - Advanced Cyber Operations Platform"
-        description="Enterprise security operations platform with APT simulation, compliance automation, architecture visualization, and AI-powered analysis for modern security teams."
-        keywords="cyber security, APT simulation, compliance automation, DevSecOps, SBOM, MITRE ATT&CK, security operations center"
-        jsonLd={jsonLd}
-      />
+  const features = [{
+    icon: Shield,
+    title: 'Advanced Security',
+    description: 'Enterprise-grade security with real-time threat detection and risk management'
+  }, {
+    icon: Zap,
+    title: 'Cyber Simulations',
+    description: 'Run realistic security scenarios to test and improve your defenses'
+  }, {
+    icon: Globe,
+    title: 'Global Operations',
+    description: 'Manage distributed teams across 25+ languages with RTL support'
+  }, {
+    icon: Lock,
+    title: 'Compliance Ready',
+    description: 'SOC 2, ISO 27001, and GDPR compliance built-in from day one'
+  }, {
+    icon: BarChart3,
+    title: 'Real-time Analytics',
+    description: 'Comprehensive dashboards and metrics for informed decision making'
+  }, {
+    icon: Users,
+    title: 'Team Collaboration',
+    description: 'Role-based access control and seamless team coordination'
+  }];
+  const highlights = ['Multi-tenant architecture', 'Advanced RBAC', '99.9% uptime SLA', 'Dedicated support', 'Custom integrations', 'White-label options'];
+  return <div className="min-h-screen bg-background">
+      <SEOHead title="Hyperion-Flux - Advanced Cyber Operations Platform" description="Enterprise security operations platform with APT simulation, compliance automation, architecture visualization, and AI-powered analysis for modern security teams." keywords="cyber security, APT simulation, compliance automation, DevSecOps, SBOM, MITRE ATT&CK, security operations center" jsonLd={jsonLd} />
       
       {/* Header */}
       <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -111,7 +87,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center animate-fade-in">
             <div className="inline-block px-4 py-2 bg-primary/10 rounded-full text-sm font-medium text-primary mb-6 animate-scale-in">
-              🚀 Advanced Cyber Operations Platform
+                Advanced Cyber Operations Platform
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
               Mission Control for Global Cyber Operations
@@ -162,8 +138,9 @@ export default function Landing() {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+            {features.map((feature, index) => <Card key={index} className="border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in" style={{
+            animationDelay: `${index * 100}ms`
+          }}>
                 <CardHeader>
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <feature.icon className="h-6 w-6 text-primary" />
@@ -171,8 +148,7 @@ export default function Landing() {
                   <CardTitle>{feature.title}</CardTitle>
                   <CardDescription>{feature.description}</CardDescription>
                 </CardHeader>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -189,14 +165,14 @@ export default function Landing() {
                 Built with security at its core. Hyperion-Flux meets the highest industry standards for data protection and compliance.
               </p>
               <div className="grid gap-4">
-                {highlights.map((highlight, index) => (
-                  <div key={index} className="flex items-center gap-3 animate-slide-in-right" style={{ animationDelay: `${index * 100}ms` }}>
+                {highlights.map((highlight, index) => <div key={index} className="flex items-center gap-3 animate-slide-in-right" style={{
+                animationDelay: `${index * 100}ms`
+              }}>
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <Check className="h-4 w-4 text-primary" />
                     </div>
                     <span className="text-foreground">{highlight}</span>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
             <div className="relative">
@@ -237,6 +213,5 @@ export default function Landing() {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 }
