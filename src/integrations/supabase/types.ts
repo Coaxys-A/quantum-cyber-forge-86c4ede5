@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_events: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          id: string
+          message: string | null
+          metadata: Json | null
+          resolved_at: string | null
+          severity: string
+          source: string | null
+          tenant_id: string | null
+          title: string
+          triggered_at: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          resolved_at?: string | null
+          severity: string
+          source?: string | null
+          tenant_id?: string | null
+          title: string
+          triggered_at?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          resolved_at?: string | null
+          severity?: string
+          source?: string | null
+          tenant_id?: string | null
+          title?: string
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_latency: {
+        Row: {
+          endpoint: string
+          error_message: string | null
+          id: string
+          method: string
+          recorded_at: string | null
+          response_time_ms: number
+          status_code: number | null
+          tenant_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          method: string
+          recorded_at?: string | null
+          response_time_ms: number
+          status_code?: number | null
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          method?: string
+          recorded_at?: string | null
+          response_time_ms?: number
+          status_code?: number | null
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -60,6 +149,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      backup_logs: {
+        Row: {
+          backup_type: string
+          completed_at: string | null
+          error_message: string | null
+          id: string
+          location: string | null
+          metadata: Json | null
+          size_bytes: number | null
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          backup_type: string
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          size_bytes?: number | null
+          started_at?: string | null
+          status: string
+        }
+        Update: {
+          backup_type?: string
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          size_bytes?: number | null
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: []
       }
       billing_webhook_events: {
         Row: {
@@ -130,6 +255,39 @@ export type Database = {
           tags?: string[] | null
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      cloud_status: {
+        Row: {
+          id: string
+          last_checked: string | null
+          latency_ms: number | null
+          metadata: Json | null
+          provider: string
+          region: string
+          service: string
+          status: string
+        }
+        Insert: {
+          id?: string
+          last_checked?: string | null
+          latency_ms?: number | null
+          metadata?: Json | null
+          provider: string
+          region: string
+          service: string
+          status: string
+        }
+        Update: {
+          id?: string
+          last_checked?: string | null
+          latency_ms?: number | null
+          metadata?: Json | null
+          provider?: string
+          region?: string
+          service?: string
+          status?: string
         }
         Relationships: []
       }
@@ -359,6 +517,48 @@ export type Database = {
           },
         ]
       }
+      deployment_logs: {
+        Row: {
+          completed_at: string | null
+          deployed_by: string | null
+          deployment_id: string
+          environment: string | null
+          id: string
+          logs: string | null
+          metadata: Json | null
+          service_name: string
+          started_at: string | null
+          status: string
+          version: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          deployed_by?: string | null
+          deployment_id: string
+          environment?: string | null
+          id?: string
+          logs?: string | null
+          metadata?: Json | null
+          service_name: string
+          started_at?: string | null
+          status: string
+          version?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          deployed_by?: string | null
+          deployment_id?: string
+          environment?: string | null
+          id?: string
+          logs?: string | null
+          metadata?: Json | null
+          service_name?: string
+          started_at?: string | null
+          status?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
       doc_pages: {
         Row: {
           category: string | null
@@ -438,6 +638,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      incident_reports: {
+        Row: {
+          affected_services: string[] | null
+          created_by: string | null
+          description: string | null
+          detected_at: string | null
+          id: string
+          metadata: Json | null
+          resolution: string | null
+          resolved_at: string | null
+          root_cause: string | null
+          severity: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          affected_services?: string[] | null
+          created_by?: string | null
+          description?: string | null
+          detected_at?: string | null
+          id?: string
+          metadata?: Json | null
+          resolution?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          severity: string
+          status?: string | null
+          title: string
+        }
+        Update: {
+          affected_services?: string[] | null
+          created_by?: string | null
+          description?: string | null
+          detected_at?: string | null
+          id?: string
+          metadata?: Json | null
+          resolution?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          severity?: string
+          status?: string | null
+          title?: string
+        }
+        Relationships: []
       }
       invoices: {
         Row: {
@@ -728,6 +973,297 @@ export type Database = {
           },
         ]
       }
+      seo_audits: {
+        Row: {
+          created_at: string | null
+          extracted_data: Json | null
+          id: string
+          issues: Json | null
+          language: string | null
+          metadata: Json | null
+          page_type: string | null
+          recommendations: Json | null
+          scanned_at: string | null
+          seo_score: number | null
+          status: string | null
+          tenant_id: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          extracted_data?: Json | null
+          id?: string
+          issues?: Json | null
+          language?: string | null
+          metadata?: Json | null
+          page_type?: string | null
+          recommendations?: Json | null
+          scanned_at?: string | null
+          seo_score?: number | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          extracted_data?: Json | null
+          id?: string
+          issues?: Json | null
+          language?: string | null
+          metadata?: Json | null
+          page_type?: string | null
+          recommendations?: Json | null
+          scanned_at?: string | null
+          seo_score?: number | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_audits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_fix_history: {
+        Row: {
+          after_value: Json | null
+          applied_at: string | null
+          applied_by: string | null
+          audit_id: string | null
+          before_value: Json | null
+          fix_type: string
+          id: string
+          tenant_id: string | null
+        }
+        Insert: {
+          after_value?: Json | null
+          applied_at?: string | null
+          applied_by?: string | null
+          audit_id?: string | null
+          before_value?: Json | null
+          fix_type: string
+          id?: string
+          tenant_id?: string | null
+        }
+        Update: {
+          after_value?: Json | null
+          applied_at?: string | null
+          applied_by?: string | null
+          audit_id?: string | null
+          before_value?: Json | null
+          fix_type?: string
+          id?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_fix_history_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "seo_audits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_fix_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_recommendations: {
+        Row: {
+          applied_at: string | null
+          audit_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          priority: string | null
+          recommendation_type: string
+          status: string | null
+          tenant_id: string | null
+          title: string
+        }
+        Insert: {
+          applied_at?: string | null
+          audit_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          recommendation_type: string
+          status?: string | null
+          tenant_id?: string | null
+          title: string
+        }
+        Update: {
+          applied_at?: string | null
+          audit_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          recommendation_type?: string
+          status?: string | null
+          tenant_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_recommendations_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "seo_audits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_recommendations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_scan_logs: {
+        Row: {
+          completed_at: string | null
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          issues_found: number | null
+          scan_type: string
+          started_at: string | null
+          status: string | null
+          tenant_id: string | null
+          urls_scanned: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          issues_found?: number | null
+          scan_type: string
+          started_at?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          urls_scanned?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          issues_found?: number | null
+          scan_type?: string
+          started_at?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          urls_scanned?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_scan_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_scores: {
+        Row: {
+          accessibility_score: number | null
+          content_score: number | null
+          id: string
+          metadata_score: number | null
+          overall_score: number | null
+          performance_score: number | null
+          scored_at: string | null
+          technical_score: number | null
+          tenant_id: string | null
+          url: string
+        }
+        Insert: {
+          accessibility_score?: number | null
+          content_score?: number | null
+          id?: string
+          metadata_score?: number | null
+          overall_score?: number | null
+          performance_score?: number | null
+          scored_at?: string | null
+          technical_score?: number | null
+          tenant_id?: string | null
+          url: string
+        }
+        Update: {
+          accessibility_score?: number | null
+          content_score?: number | null
+          id?: string
+          metadata_score?: number | null
+          overall_score?: number | null
+          performance_score?: number | null
+          scored_at?: string | null
+          technical_score?: number | null
+          tenant_id?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_scores_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_health: {
+        Row: {
+          error_message: string | null
+          id: string
+          last_check: string | null
+          metadata: Json | null
+          response_time_ms: number | null
+          service_name: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          last_check?: string | null
+          metadata?: Json | null
+          response_time_ms?: number | null
+          service_name: string
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          last_check?: string | null
+          metadata?: Json | null
+          response_time_ms?: number | null
+          service_name?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       simulation_events: {
         Row: {
           created_at: string | null
@@ -812,6 +1348,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ssl_status: {
+        Row: {
+          days_remaining: number | null
+          domain: string
+          id: string
+          issuer: string | null
+          last_checked: string | null
+          metadata: Json | null
+          status: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          days_remaining?: number | null
+          domain: string
+          id?: string
+          issuer?: string | null
+          last_checked?: string | null
+          metadata?: Json | null
+          status: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          days_remaining?: number | null
+          domain?: string
+          id?: string
+          issuer?: string | null
+          last_checked?: string | null
+          metadata?: Json | null
+          status?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
       }
       stages: {
         Row: {
@@ -913,6 +1485,47 @@ export type Database = {
           },
           {
             foreignKeyName: "subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_metrics: {
+        Row: {
+          id: string
+          labels: Json | null
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          recorded_at: string | null
+          tenant_id: string | null
+          unit: string | null
+        }
+        Insert: {
+          id?: string
+          labels?: Json | null
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          recorded_at?: string | null
+          tenant_id?: string | null
+          unit?: string | null
+        }
+        Update: {
+          id?: string
+          labels?: Json | null
+          metric_name?: string
+          metric_type?: string
+          metric_value?: number
+          recorded_at?: string | null
+          tenant_id?: string | null
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_metrics_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
