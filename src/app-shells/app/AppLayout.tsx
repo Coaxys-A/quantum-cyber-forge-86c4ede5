@@ -41,6 +41,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     { to: '/app/security', icon: Shield, label: t('nav.security') },
     { to: '/app/simulations', icon: Zap, label: t('nav.simulation') },
     { to: '/app/architecture', icon: Network, label: t('nav.architecture') },
+    { to: '/app/compliance', icon: Shield, label: 'Compliance' },
+    { to: '/app/devsecops', icon: Shield, label: 'DevSecOps' },
     { to: '/app/billing', icon: CreditCard, label: t('nav.billing') },
     { to: '/app/team', icon: Users, label: 'Team' },
     { to: '/app/notifications', icon: Bell, label: 'Notifications' },
