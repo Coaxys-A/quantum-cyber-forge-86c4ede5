@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import OnboardingPage from './pages/OnboardingPage';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
 import DashboardPage from './pages/DashboardPage';
 import ModulesPage from './pages/ModulesPage';
 import ModuleDetailPage from './pages/ModuleDetailPage';
@@ -51,6 +52,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function AppShell() {
+  // Use secure auth with device fingerprinting and security logging
+  useSecureAuth();
+  
   return (
     <Routes>
       {/* Public routes */}

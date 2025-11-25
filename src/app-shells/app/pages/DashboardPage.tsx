@@ -4,6 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { DemoBanner } from '@/components/DemoBanner';
+import { LoadingState } from '@/components/LoadingState';
+import { EmptyStateEnhanced } from '@/components/EmptyStateEnhanced';
 import { 
   Activity, 
   AlertTriangle, 
@@ -86,15 +89,13 @@ export default function DashboardPage() {
   ];
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState message="Loading dashboard..." />;
   }
 
   return (
     <div className="space-y-8 animate-fade-in">
+      <DemoBanner />
+      
       <div>
         <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">
