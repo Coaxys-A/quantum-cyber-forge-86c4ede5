@@ -1,5 +1,6 @@
 /**
  * IP-based language detection using multiple free APIs
+ * With improved timeout handling and caching
  */
 
 interface IPLocationData {
@@ -10,8 +11,7 @@ interface IPLocationData {
 
 const countryLanguageMap: Record<string, string> = {
   // Persian
-  IR: 'fa',
-  AF: 'fa',
+  IR: 'fa', AF: 'fa',
   
   // Arabic
   SA: 'ar', AE: 'ar', EG: 'ar', IQ: 'ar', JO: 'ar', KW: 'ar',
@@ -86,24 +86,79 @@ const countryLanguageMap: Record<string, string> = {
   ID: 'id',
 };
 
+const CACHE_KEY = 'detected_language';
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CachedLanguage {
+  language: string;
+  timestamp: number;
+}
+
+function getCachedLanguage(): string | null {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { language, timestamp }: CachedLanguage = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_EXPIRY) {
+        return language;
+      }
+    }
+  } catch {
+    // Ignore cache errors
+  }
+  return null;
+}
+
+function setCachedLanguage(language: string): void {
+  try {
+    const data: CachedLanguage = { language, timestamp: Date.now() };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // Ignore cache errors
+  }
+}
+
+/**
+ * Fast timeout wrapper for fetch
+ */
+async function fetchWithTimeout(url: string, timeout: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
 /**
  * Detect language based on IP geolocation
  * Falls back to browser language if IP detection fails
  */
 export async function detectLanguageFromIP(): Promise<string> {
+  // Check cache first
+  const cached = getCachedLanguage();
+  if (cached) {
+    console.log(`Using cached language: ${cached}`);
+    return cached;
+  }
+
+  // Try browser language first (fast path)
+  const browserLang = detectBrowserLanguage();
+  
+  // Try IP detection in background, but don't block
   try {
-    // Try multiple free IP geolocation APIs in sequence
     const apis = [
-      'https://ipapi.co/json/',
-      'https://ip-api.com/json/',
-      'https://ipwhois.app/json/',
+      { url: 'https://ipapi.co/json/', timeout: 1500 },
     ];
 
-    for (const api of apis) {
+    for (const { url, timeout } of apis) {
       try {
-        const response = await fetch(api, {
-          signal: AbortSignal.timeout(3000), // 3 second timeout
-        });
+        const response = await fetchWithTimeout(url, timeout);
         
         if (!response.ok) continue;
         
@@ -114,21 +169,22 @@ export async function detectLanguageFromIP(): Promise<string> {
           const language = countryLanguageMap[countryCode.toUpperCase()];
           if (language) {
             console.log(`Detected language ${language} from country ${countryCode}`);
+            setCachedLanguage(language);
             return language;
           }
         }
-      } catch (err) {
-        console.warn(`IP API ${api} failed:`, err);
+      } catch {
+        // Continue to next API or fallback
         continue;
       }
     }
-    
-    // If all IP APIs fail, fall back to browser language
-    return detectBrowserLanguage();
-  } catch (error) {
-    console.error('IP detection failed:', error);
-    return detectBrowserLanguage();
+  } catch {
+    // Fall through to browser language
   }
+  
+  // Cache and return browser language
+  setCachedLanguage(browserLang);
+  return browserLang;
 }
 
 /**
@@ -166,12 +222,20 @@ export async function initializeLanguage(i18n: any) {
     return;
   }
   
-  // Detect and set language
-  const detectedLanguage = await detectLanguageFromIP();
-  
-  // Only change if different from current
-  if (i18n.language !== detectedLanguage) {
-    await i18n.changeLanguage(detectedLanguage);
-    console.log(`Auto-detected and set language to: ${detectedLanguage}`);
+  // Use browser language immediately (non-blocking)
+  const browserLang = detectBrowserLanguage();
+  if (i18n.language !== browserLang) {
+    await i18n.changeLanguage(browserLang);
   }
+  
+  // Then try IP detection in background
+  detectLanguageFromIP().then((detectedLanguage) => {
+    if (detectedLanguage !== browserLang && i18n.language !== detectedLanguage) {
+      // Only change if IP detection gives different result
+      i18n.changeLanguage(detectedLanguage);
+      console.log(`Updated language to: ${detectedLanguage}`);
+    }
+  }).catch(() => {
+    // Keep browser language
+  });
 }
